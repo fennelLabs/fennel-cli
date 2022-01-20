@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
+
+from fennel_cli.cmdparse import parse_arguments
+
+
 def main():
-    pass
+    args = parse_arguments()
 
 
 if __name__ == '__main__':
