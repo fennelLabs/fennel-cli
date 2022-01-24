@@ -1,4 +1,11 @@
+#![feature(test)]
+
+mod rsa_tools;
+mod aes_tools;
+
 use clap::Parser;
+use rsa_tools::*;
+use aes_tools::*;
 
 #[derive(Parser)]
 struct Cli {
