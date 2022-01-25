@@ -2,10 +2,12 @@
 
 mod rsa_tools;
 mod aes_tools;
+mod fennel;
 
 use clap::Parser;
 use rsa_tools::*;
 use aes_tools::*;
+use fennel::*;
 
 #[derive(Parser)]
 struct Cli {
