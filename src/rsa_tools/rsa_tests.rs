@@ -22,4 +22,19 @@ mod rsa_tests {
         let decrypt_result = decrypt(private_key, result);
         assert_eq!(test.to_vec(), decrypt_result);
     }
+
+    #[test]
+    fn test_sign() {
+        let test = b"this is test text";
+        let (private_key, _) = generate_keypair(2048);
+        sign(private_key, test.to_vec());
+    }
+
+    #[test]
+    fn test_verify() {
+        let test = b"this is test text";
+        let (private_key, public_key) = generate_keypair(2048);
+        let signed = sign(private_key, test.to_vec());
+        verify(public_key, test.to_vec(), signed);
+    }
 }
