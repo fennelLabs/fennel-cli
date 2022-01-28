@@ -1,13 +1,13 @@
 #![feature(test)]
 
-mod rsa_tools;
 mod aes_tools;
 mod fennel;
+mod rsa_tools;
 
-use clap::Parser;
-use rsa_tools::*;
 use aes_tools::*;
+use clap::Parser;
 use fennel::*;
+use rsa_tools::*;
 
 #[derive(Parser)]
 struct Cli {
