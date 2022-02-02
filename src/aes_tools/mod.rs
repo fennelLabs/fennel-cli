@@ -3,10 +3,10 @@ mod bench;
 #[cfg(test)]
 mod tests;
 
-    pub fn generate_key() {}
+pub fn generate_key() {}
 
-    pub fn generate_cipher() {}
+pub fn generate_cipher() {}
 
-    pub fn encrypt() {}
+pub fn encrypt() {}
 
-    pub fn decrypt() {}
+pub fn decrypt() {}
