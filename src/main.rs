@@ -1,6 +1,8 @@
 #![feature(test)]
 
 mod aes_tools;
+mod client;
+mod database;
 mod fennel;
 mod rsa_tools;
 

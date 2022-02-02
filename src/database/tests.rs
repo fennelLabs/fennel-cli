@@ -1,8 +1,6 @@
 use crate::database::*;
 use std::sync::Arc;
 
-use crate::get_identity_database_handle;
-
 #[test]
 fn test_insert_and_retrieve_message() {
     let db = get_message_database_handle();

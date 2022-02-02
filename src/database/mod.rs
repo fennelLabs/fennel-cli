@@ -59,6 +59,21 @@ pub fn retrieve_messages(db_lock: Arc<Mutex<DB>>, identity: Identity) -> Vec<Mes
     message_list
 }
 
+pub fn insert_message_list(messages_db: Arc<Mutex<DB>>, messages_list: Vec<Message>) -> Result<(), Error> {
+    let db = messages_db.lock().unwrap();
+    for message in messages_list {
+        let message_bytes = message.encode();
+        let m: Vec<u8> = message
+            .recipient_id
+            .iter()
+            .cloned()
+            .chain(hash(&message_bytes))
+            .collect();
+        db.put(m, message_bytes).unwrap();
+    }
+    Ok(())
+}
+
 pub fn insert_identity(db_lock: Arc<Mutex<DB>>, identity: &Identity) -> Result<(), Error> {
     let db = db_lock.lock().unwrap();
     db.put::<_, Vec<_>>(identity.id, identity.encode()).unwrap();
