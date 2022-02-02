@@ -1,9 +1,8 @@
 #[cfg(test)]
-mod aes_bench;
+mod bench;
 #[cfg(test)]
-mod aes_tests;
+mod tests;
 
-mod aes_tools {
     pub fn generate_key() {}
 
     pub fn generate_cipher() {}
@@ -11,4 +10,3 @@ mod aes_tools {
     pub fn encrypt() {}
 
     pub fn decrypt() {}
-}
