@@ -74,7 +74,7 @@ pub async fn handle_connection(
             response.push(message_buffer);
             stream.read_exact(&mut end).await?;
         }
-        let messages_list = parse_remote_messages(identity_db, response, server_packet).await;
+        let messages_list = parse_remote_messages(response).await;
         put_messages(message_db, messages_list)
             .await
             .expect("failed to commit messages");
@@ -125,9 +125,7 @@ async fn send_message(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'stati
 }
 
 async fn parse_remote_messages(
-    identity_database: Arc<Mutex<DB>>,
     messages_response: Vec<[u8; 3182]>,
-    packet: FennelServerPacket,
 ) -> Vec<Message> {
     let mut message_list: Vec<Message> = Vec::new();
     for message in messages_response {
