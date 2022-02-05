@@ -6,8 +6,8 @@ use std::error::Error;
 
 use clap::Parser;
 use client::{
-    handle_connection, handle_decrypt, handle_encrypt, handle_generate_keypair, handle_sign,
-    handle_verify, handle_backlog_decrypt,
+    handle_backlog_decrypt, handle_connection, handle_decrypt, handle_encrypt,
+    handle_generate_keypair, handle_sign, handle_verify,
 };
 use codec::Encode;
 use command::{Cli, Commands};
@@ -44,11 +44,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
         } => handle_verify(identity_db, message, signature, identity),
 
         Commands::DecryptBacklog { identity } => {
-            handle_backlog_decrypt(message_db, Identity {
-                id: identity.to_ne_bytes(),
-                fingerprint: fingerprint,
-                public_key: export_public_key_to_binary(&public_key).unwrap(),
-            }, private_key);
+            handle_backlog_decrypt(
+                message_db,
+                Identity {
+                    id: identity.to_ne_bytes(),
+                    fingerprint: fingerprint,
+                    public_key: export_public_key_to_binary(&public_key).unwrap(),
+                },
+                private_key,
+            );
         }
 
         Commands::SendMessage {
