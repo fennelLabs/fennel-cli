@@ -25,6 +25,9 @@ pub enum Commands {
     Sign { message: String },
 
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
+    DecryptBacklog { identity: u32 },
+
+    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     SendMessage {
         sender_id: u32,
         message: String,
@@ -34,9 +37,7 @@ pub enum Commands {
     GetMessages { id: u32 },
 
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    CreateIdentity {
-        id: u32,
-    },
+    CreateIdentity { id: u32 },
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     RetrieveIdentity { id: u32 },
 }

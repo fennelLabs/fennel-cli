@@ -5,10 +5,12 @@ use codec::{Decode, Encode};
 use fennel_lib::{
     export_public_key_to_binary, generate_keypair, hash, import_keypair_from_file,
     import_public_key_from_binary, insert_identity, insert_message, retrieve_identity,
+    retrieve_messages,
     rsa_tools::{decrypt, encrypt},
     sign, verify, FennelServerPacket, Identity, Message,
 };
 use rocksdb::DB;
+use rsa::RsaPrivateKey;
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -98,7 +100,8 @@ async fn send_message(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'stati
 async fn parse_remote_messages(messages_response: Vec<[u8; 3182]>) -> Vec<Message> {
     let mut message_list: Vec<Message> = Vec::new();
     for message in messages_response {
-        message_list.push(Decode::decode(&mut (message.as_slice())).unwrap());
+        let unpacked_message = Decode::decode(&mut (message.as_slice())).unwrap();
+        message_list.push(unpacked_message);
     }
     message_list
 }
@@ -114,6 +117,19 @@ fn insert_message_list(messages_db: Arc<Mutex<DB>>, messages_list: Vec<Message>)
         insert_message(messages_db_clone, message).unwrap();
     }
     Ok(())
+}
+
+pub fn handle_backlog_decrypt(
+    message_db: Arc<Mutex<DB>>,
+    identity: Identity,
+    private_key: RsaPrivateKey,
+) {
+    let message_list = retrieve_messages(message_db, identity);
+    for message in message_list {
+        println!("{:?}", message.sender_id);
+        println!("{:?}", decrypt(&private_key, message.message.to_vec()));
+        println!();
+    }
 }
 
 pub fn handle_generate_keypair() -> ([u8; 16], rsa::RsaPrivateKey, rsa::RsaPublicKey) {
@@ -140,7 +156,7 @@ pub fn handle_encrypt(db_lock: Arc<Mutex<DB>>, identity: &u32, plaintext: &Strin
 }
 
 pub fn handle_decrypt(ciphertext: &String, private_key: rsa::RsaPrivateKey) {
-    let plaintext = decrypt(private_key, ciphertext.as_bytes().to_vec());
+    let plaintext = decrypt(&private_key, ciphertext.as_bytes().to_vec());
     println!("{}", std::str::from_utf8(&plaintext).unwrap());
 }
 
