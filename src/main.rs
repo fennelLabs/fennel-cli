@@ -46,6 +46,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         Commands::DecryptBacklog { identity } => {
             handle_backlog_decrypt(
                 message_db,
+                identity_db,
                 Identity {
                     id: identity.to_ne_bytes(),
                     fingerprint: fingerprint,

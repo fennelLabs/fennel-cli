@@ -121,12 +121,22 @@ fn insert_message_list(messages_db: Arc<Mutex<DB>>, messages_list: Vec<Message>)
 
 pub fn handle_backlog_decrypt(
     message_db: Arc<Mutex<DB>>,
+    identity_db: Arc<Mutex<DB>>,
     identity: Identity,
     private_key: RsaPrivateKey,
 ) {
     let message_list = retrieve_messages(message_db, identity);
     for message in message_list {
-        println!("{:?}", message.sender_id);
+        let sender_identity = retrieve_identity(Arc::clone(&identity_db), message.sender_id);
+        println!(
+            "{:?} Verified: {:?}",
+            message.sender_id,
+            verify(
+                import_public_key_from_binary(&sender_identity.public_key).unwrap(),
+                message.message.to_vec(),
+                message.signature.to_vec()
+            )
+        );
         println!("{:?}", decrypt(&private_key, message.message.to_vec()));
         println!();
     }
