@@ -3,14 +3,15 @@ mod tests;
 
 use codec::{Decode, Encode};
 use fennel_lib::{
-    export_public_key_to_binary, generate_keypair, hash, import_keypair_from_file,
-    import_public_key_from_binary, insert_identity, insert_message, retrieve_identity,
-    retrieve_messages,
+    export_keypair_to_file, export_public_key_to_binary, generate_keypair, hash,
+    import_keypair_from_file, import_public_key_from_binary, insert_identity, insert_message,
+    retrieve_identity, retrieve_messages,
     rsa_tools::{decrypt, encrypt},
     sign, verify, FennelServerPacket, Identity, Message,
 };
 use rocksdb::DB;
 use rsa::RsaPrivateKey;
+use std::str;
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -26,26 +27,33 @@ pub async fn handle_connection(
     let mut server_response_code = [0; 1];
     if server_packet.command == [0] {
         let r = submit_identity(identity_db, server_packet).await;
-        if r == &[0] {
+        if r != &[0] {
             panic!("identity failed to commit.");
         }
         stream.write_all(&server_packet.encode()).await?;
+        println!("sent");
         stream.read_exact(&mut server_response_code).await?;
         if &server_response_code != &[0] {
-            panic!("server operation failed")
+            panic!("server operation failed");
+        } else {
+            println!("identity created successfully");
         }
     } else if server_packet.command == [1] {
         let r = send_message(message_db, server_packet).await;
-        if r == &[0] {
-            panic!("identity failed to commit.");
+        if r != &[0] {
+            panic!("message failed to commit.");
         }
         stream.write_all(&server_packet.encode()).await?;
+        println!("sent");
         stream.read_exact(&mut server_response_code).await?;
         if &server_response_code != &[0] {
-            panic!("server operation failed")
+            panic!("server operation failed");
+        } else {
+            println!("message sent successfully");
         }
     } else if server_packet.command == [2] {
         stream.write_all(&server_packet.encode()).await?;
+        println!("sent");
         let mut response: Vec<[u8; 3182]> = Vec::new();
         let mut end = [1];
         if end != [0] {
@@ -149,7 +157,21 @@ pub fn handle_generate_keypair() -> ([u8; 16], rsa::RsaPrivateKey, rsa::RsaPubli
             PathBuf::from("./Public.key"),
         ) {
             Ok(v) => v,
-            Err(_) => generate_keypair(8192),
+            Err(_) => {
+                println!("Setting up a new keypair...");
+                let (private_key, public_key) = generate_keypair(8192);
+                println!("Finished.");
+
+                export_keypair_to_file(
+                    &private_key,
+                    &public_key,
+                    PathBuf::from("./Private.key"),
+                    PathBuf::from("./Public.key"),
+                )
+                .expect("failed to export keypair");
+
+                (private_key, public_key)
+            }
         };
     let fingerprint: [u8; 16] = hash(export_public_key_to_binary(&public_key).unwrap())[0..16]
         .try_into()
@@ -157,22 +179,20 @@ pub fn handle_generate_keypair() -> ([u8; 16], rsa::RsaPrivateKey, rsa::RsaPubli
     (fingerprint, private_key, public_key)
 }
 
-pub fn handle_encrypt(db_lock: Arc<Mutex<DB>>, identity: &u32, plaintext: &String) {
+pub fn handle_encrypt(db_lock: Arc<Mutex<DB>>, identity: &u32, plaintext: &String) -> String {
     let id_array = identity.to_ne_bytes();
     let recipient = retrieve_identity(db_lock, id_array);
     let public_key = import_public_key_from_binary(&recipient.public_key).unwrap();
-    let ciphertext = encrypt(public_key, plaintext.as_bytes().to_vec());
-    println!("{}", std::str::from_utf8(&ciphertext).unwrap());
+    hex::encode(encrypt(public_key, plaintext.as_bytes().to_vec()))
 }
 
-pub fn handle_decrypt(ciphertext: &String, private_key: rsa::RsaPrivateKey) {
-    let plaintext = decrypt(&private_key, ciphertext.as_bytes().to_vec());
-    println!("{}", std::str::from_utf8(&plaintext).unwrap());
+pub fn handle_decrypt(ciphertext: &String, private_key: rsa::RsaPrivateKey) -> String {
+    let decrypted = decrypt(&private_key, hex::decode(ciphertext).unwrap());
+    String::from(str::from_utf8(&decrypted).unwrap())
 }
 
-pub fn handle_sign(message: &String, private_key: rsa::RsaPrivateKey) {
-    let signature = sign(private_key, message.as_bytes().to_vec());
-    println!("{}", std::str::from_utf8(&signature).unwrap());
+pub fn handle_sign(message: &String, private_key: rsa::RsaPrivateKey) -> String {
+    hex::encode(sign(private_key, message.as_bytes().to_vec()))
 }
 
 pub fn handle_verify(
@@ -180,17 +200,13 @@ pub fn handle_verify(
     message: &String,
     signature: &String,
     identity: &u32,
-) {
+) -> bool {
     let id_array = identity.to_ne_bytes();
     let recipient = retrieve_identity(db_lock, id_array);
     let public_key = import_public_key_from_binary(&recipient.public_key).unwrap();
-    if verify(
+    verify(
         public_key,
         message.as_bytes().to_vec(),
-        signature.as_bytes().to_vec(),
-    ) {
-        println!("Verified: {}", identity);
-    } else {
-        println!("Signature failed to verify.");
-    }
+        hex::decode::<&String>(signature).unwrap(),
+    )
 }

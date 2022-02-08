@@ -14,6 +14,7 @@ sha3 = "0.10.0"
 tokio = { version = "1", features = ["full"] }
 slice-of-array = "0.3.1"
 rocksdb = "0.17.0"
+hex = "0.4.3"
 codec = { version = "2.3.1", package = "parity-scale-codec", features = ["derive"] }
 fennel-lib = { git = "https://github.com/fennelLabs/fennel-lib", branch = "master", package = "fennel-lib" }
 

@@ -32,29 +32,30 @@ async fn main() -> Result<(), Box<dyn Error>> {
             identity,
             plaintext,
         } => {
-            handle_encrypt(identity_db, identity, plaintext);
+            println!("{}", handle_encrypt(identity_db, identity, plaintext));
         }
-        Commands::Decrypt { ciphertext } => handle_decrypt(ciphertext, private_key),
+        Commands::Decrypt { ciphertext } => println!("{}", handle_decrypt(ciphertext, private_key)),
 
-        Commands::Sign { message } => handle_sign(message, private_key),
+        Commands::Sign { message } => println!("{}", handle_sign(message, private_key)),
         Commands::Verify {
             message,
             signature,
             identity,
-        } => handle_verify(identity_db, message, signature, identity),
+        } => println!(
+            "Verified: {}",
+            handle_verify(identity_db, message, signature, identity)
+        ),
 
-        Commands::DecryptBacklog { identity } => {
-            handle_backlog_decrypt(
-                message_db,
-                identity_db,
-                Identity {
-                    id: identity.to_ne_bytes(),
-                    fingerprint: fingerprint,
-                    public_key: export_public_key_to_binary(&public_key).unwrap(),
-                },
-                private_key,
-            );
-        }
+        Commands::DecryptBacklog { identity } => handle_backlog_decrypt(
+            message_db,
+            identity_db,
+            Identity {
+                id: identity.to_ne_bytes(),
+                fingerprint: fingerprint,
+                public_key: export_public_key_to_binary(&public_key).unwrap(),
+            },
+            private_key,
+        ),
 
         Commands::SendMessage {
             sender_id,
@@ -63,7 +64,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         } => {
             let ciphertext = message.encode().try_into().unwrap();
             let packet = FennelServerPacket {
-                command: [0; 1],
+                command: [1; 1],
                 identity: sender_id.to_ne_bytes(),
                 fingerprint: fingerprint,
                 message: ciphertext,
@@ -75,7 +76,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         Commands::GetMessages { id } => {
             let packet = FennelServerPacket {
-                command: [1; 1],
+                command: [2; 1],
                 identity: id.to_ne_bytes(),
                 fingerprint: fingerprint,
                 message: [0; 1024],
@@ -88,7 +89,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         Commands::CreateIdentity { id } => {
             let packet = FennelServerPacket {
-                command: [2; 1],
+                command: [0; 1],
                 identity: id.to_ne_bytes(),
                 fingerprint: fingerprint,
                 message: [0; 1024],
