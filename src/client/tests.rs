@@ -42,5 +42,8 @@ fn test_handle_encrypt_and_decrypt() {
     insert_identity(db_3, &identity).expect("failed identity insertion");
 
     let signature = handle_sign(&String::from("Test"), private_key);
-    assert_eq!(handle_verify(db_4, &String::from("Test"), &signature, &0), true)
+    assert_eq!(
+        handle_verify(db_4, &String::from("Test"), &signature, &0),
+        true
+    )
 }
