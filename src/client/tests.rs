@@ -13,8 +13,6 @@ use super::{handle_decrypt, handle_encrypt, handle_generate_keypair};
 fn test_handle_encrypt_and_decrypt() {
     let db = get_identity_database_handle();
     let db_2 = Arc::clone(&db);
-    let db_3 = Arc::clone(&db_2);
-    let db_4 = Arc::clone(&db_2);
 
     let (_, private_key, public_key) = handle_generate_keypair();
     let key_bytes = export_public_key_to_binary(&public_key).expect("failed to decode public key");
@@ -30,7 +28,12 @@ fn test_handle_encrypt_and_decrypt() {
     let decrypted = handle_decrypt(&result, private_key);
 
     assert_eq!(String::from("test"), decrypted);
+}
 
+#[test]
+fn test_handle_sign_and_verify() {
+    let db = get_identity_database_handle();
+    let db_2 = Arc::clone(&db);
     let (_, private_key, public_key) = handle_generate_keypair();
     let key_bytes = export_public_key_to_binary(&public_key).expect("failed to decode public key");
 
@@ -39,11 +42,11 @@ fn test_handle_encrypt_and_decrypt() {
         fingerprint: [0; 16],
         public_key: key_bytes,
     };
-    insert_identity(db_3, &identity).expect("failed identity insertion");
+    insert_identity(db, &identity).expect("failed identity insertion");
 
     let signature = handle_sign(&String::from("Test"), private_key);
     assert_eq!(
-        handle_verify(db_4, &String::from("Test"), &signature, &0),
+        handle_verify(db_2, &String::from("Test"), &signature, &0),
         true
     )
 }

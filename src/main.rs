@@ -2,7 +2,7 @@
 
 mod client;
 mod command;
-use std::error::Error;
+use std::{error::Error, sync::Arc};
 
 use clap::Parser;
 use client::{
@@ -62,25 +62,26 @@ async fn main() -> Result<(), Box<dyn Error>> {
             message,
             recipient_id,
         } => {
-            let ciphertext = message.encode().try_into().unwrap();
+            let identity_db_2 = Arc::clone(&identity_db);
+            let ciphertext = handle_encrypt(identity_db, recipient_id, message);
             let packet = FennelServerPacket {
                 command: [1; 1],
                 identity: sender_id.to_ne_bytes(),
                 fingerprint: fingerprint,
-                message: ciphertext,
-                signature: sign(private_key, ciphertext.to_vec()).try_into().unwrap(),
+                message: ciphertext.encode().try_into().unwrap(),
+                signature: sign(private_key, ciphertext.into_bytes()).encode().try_into().unwrap(),
                 public_key: export_public_key_to_binary(&public_key).unwrap(),
                 recipient: recipient_id.to_ne_bytes(),
             };
-            handle_connection(identity_db, message_db, listener, packet).await?
+            handle_connection(identity_db_2, message_db, listener, packet).await?
         }
         Commands::GetMessages { id } => {
             let packet = FennelServerPacket {
                 command: [2; 1],
                 identity: id.to_ne_bytes(),
                 fingerprint: fingerprint,
-                message: [0; 1024],
-                signature: sign(private_key, [0; 1024].to_vec()).try_into().unwrap(),
+                message: [0; 2050],
+                signature: sign(private_key, [0; 2050].to_vec()).try_into().unwrap(),
                 public_key: export_public_key_to_binary(&public_key).unwrap(),
                 recipient: [0; 4],
             };
@@ -92,8 +93,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 command: [0; 1],
                 identity: id.to_ne_bytes(),
                 fingerprint: fingerprint,
-                message: [0; 1024],
-                signature: sign(private_key, [0; 1024].to_vec()).try_into().unwrap(),
+                message: [0; 2050],
+                signature: sign(private_key, [0; 2050].to_vec()).try_into().unwrap(),
                 public_key: export_public_key_to_binary(&public_key).unwrap(),
                 recipient: [0; 4],
             };
@@ -104,8 +105,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 command: [3; 1],
                 identity: id.to_ne_bytes(),
                 fingerprint: fingerprint,
-                message: [0; 1024],
-                signature: sign(private_key, [0; 1024].to_vec()).try_into().unwrap(),
+                message: [0; 2050],
+                signature: sign(private_key, [0; 2050].to_vec()).try_into().unwrap(),
                 public_key: export_public_key_to_binary(&public_key).unwrap(),
                 recipient: [0; 4],
             };
