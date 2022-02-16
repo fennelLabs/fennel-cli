@@ -30,10 +30,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
             identity,
             plaintext,
         } => {
-            println!("{}", hex::encode(handle_encrypt(identity_db, identity, plaintext)));
+            println!(
+                "{}",
+                hex::encode(handle_encrypt(identity_db, identity, plaintext))
+            );
         }
         Commands::Decrypt { ciphertext } => {
-            println!("{}", handle_decrypt(hex::decode(ciphertext).unwrap(), &private_key))
+            println!(
+                "{}",
+                handle_decrypt(hex::decode(ciphertext).unwrap(), &private_key)
+            )
         }
 
         Commands::Sign { message } => println!("{}", handle_sign(message, private_key)),
@@ -82,10 +88,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 identity: sender_id.to_ne_bytes(),
                 fingerprint,
                 message: ciphertext.to_owned().try_into().unwrap(),
-                signature: sign(private_key, ciphertext)
-                    .to_vec()
-                    .try_into()
-                    .unwrap(),
+                signature: sign(private_key, ciphertext).to_vec().try_into().unwrap(),
                 public_key: export_public_key_to_binary(&public_key).unwrap(),
                 recipient: recipient_id.to_ne_bytes(),
             };

@@ -180,7 +180,10 @@ pub fn handle_backlog_decrypt(
                 message.signature.to_vec()
             )
         );
-        println!("{:?}", handle_decrypt(message.message.to_vec(), &private_key));
+        println!(
+            "{:?}",
+            handle_decrypt(message.message.to_vec(), &private_key)
+        );
         println!();
     }
 }
