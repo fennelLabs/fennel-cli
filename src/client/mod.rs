@@ -11,6 +11,7 @@ use fennel_lib::{
 };
 use rocksdb::DB;
 use rsa::RsaPrivateKey;
+use std::panic;
 use std::str;
 use std::{
     path::PathBuf,
@@ -24,52 +25,80 @@ pub async fn handle_connection(
     mut stream: TcpStream,
     server_packet: FennelServerPacket,
 ) -> Result<()> {
-    let mut server_response_code = [0; 1];
+    let mut server_response_code = [99; 1];
+    if !verify_packet_signature(&server_packet) {
+        panic!("server packet signature failed to verify");
+    }
     if server_packet.command == [0] {
         let r = submit_identity(identity_db, server_packet).await;
-        if r != &[0] {
+        if r != [0] {
             panic!("identity failed to commit.");
         }
         stream.write_all(&server_packet.encode()).await?;
         println!("sent");
         stream.read_exact(&mut server_response_code).await?;
-        if &server_response_code != &[0] {
-            panic!("server operation failed");
-        } else {
-            println!("identity created successfully");
-        }
     } else if server_packet.command == [1] {
         let r = send_message(message_db, server_packet).await;
-        if r != &[0] {
+        if r != [0] {
             panic!("message failed to commit.");
         }
         stream.write_all(&server_packet.encode()).await?;
         println!("sent");
         stream.read_exact(&mut server_response_code).await?;
-        if &server_response_code != &[0] {
-            panic!("server operation failed");
-        } else {
-            println!("message sent successfully");
-        }
     } else if server_packet.command == [2] {
         stream.write_all(&server_packet.encode()).await?;
         println!("sent");
-        let mut response: Vec<[u8; 3182]> = Vec::new();
-        let mut end = [1];
-        if end != [0] {
-            let mut message_buffer = [0; 3182];
-            stream.read_exact(&mut message_buffer).await?;
-            response.push(message_buffer);
+        let mut response: Vec<[u8; 3110]> = Vec::new();
+        let mut end = [255];
+        stream.read_exact(&mut end).await?;
+        while end != [0] {
+            println!("{} messages remaining", end[0]);
+            let mut message_buffer = [0; 3110];
+            let mut server_hash = [0; 64];
+            let mut intermediate_response_code = [0; 1];
             stream.read_exact(&mut end).await?;
+            stream.read_exact(&mut server_hash).await?;
+            stream.read_exact(&mut message_buffer).await?;
+            let client_hash: [u8; 64] = hash(&message_buffer).try_into().unwrap();
+            stream.write_all(&client_hash).await?;
+            if server_hash == client_hash {
+                response.push(message_buffer);
+            } else {
+                println!("a message failed hash checking on our end.");
+            }
+            stream.read_exact(&mut intermediate_response_code).await?;
+            if intermediate_response_code != [0] {
+                println!("a message failed hash checking on the server end");
+            }
         }
+        stream.read_exact(&mut server_response_code).await?;
         put_messages(message_db, parse_remote_messages(response).await)
             .await
             .expect("failed to commit messages");
     } else {
-        stream.write_all(&[0]).await?;
+        println!("invalid command code");
+    }
+
+    if server_response_code == [0] {
+        println!("operation completed successfully");
+    } else if server_response_code == [9] {
+        println!("packet signature failed to verify");
+    } else if server_response_code == [97] {
+        println!("messages downloaded successfully");
+    } else if server_response_code == [99] {
+        println!("no server action taken");
+    } else {
+        println!("return code was: {:?}", &server_response_code);
+        panic!("server operation failed");
     }
 
     Ok(())
+}
+
+fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
+    let pub_key =
+        import_public_key_from_binary(&packet.public_key).expect("public key failed to import");
+    verify(pub_key, packet.message.to_vec(), packet.signature.to_vec())
 }
 
 async fn submit_identity(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'static [u8] {
@@ -105,11 +134,17 @@ async fn send_message(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'stati
     }
 }
 
-async fn parse_remote_messages(messages_response: Vec<[u8; 3182]>) -> Vec<Message> {
+async fn parse_remote_messages(messages_response: Vec<[u8; 3110]>) -> Vec<Message> {
     let mut message_list: Vec<Message> = Vec::new();
     for message in messages_response {
-        let unpacked_message = Decode::decode(&mut (message.as_slice())).unwrap();
-        message_list.push(unpacked_message);
+        let unpacked_message: Message = Decode::decode(&mut (message.as_slice())).unwrap();
+        if verify(
+            import_public_key_from_binary(&unpacked_message.public_key).unwrap(),
+            unpacked_message.message.to_vec(),
+            unpacked_message.signature.to_vec(),
+        ) {
+            message_list.push(unpacked_message);
+        }
     }
     message_list
 }
@@ -137,15 +172,15 @@ pub fn handle_backlog_decrypt(
     for message in message_list {
         let sender_identity = retrieve_identity(Arc::clone(&identity_db), message.sender_id);
         println!(
-            "{:?} Verified: {:?}",
-            message.sender_id,
+            "From: {:?} Verified: {:?}",
+            u32::from_ne_bytes(message.sender_id),
             verify(
                 import_public_key_from_binary(&sender_identity.public_key).unwrap(),
                 message.message.to_vec(),
                 message.signature.to_vec()
             )
         );
-        println!("{:?}", decrypt(&private_key, message.message.to_vec()));
+        println!("{:?}", handle_decrypt(message.message.to_vec(), &private_key));
         println!();
     }
 }
@@ -179,26 +214,26 @@ pub fn handle_generate_keypair() -> ([u8; 16], rsa::RsaPrivateKey, rsa::RsaPubli
     (fingerprint, private_key, public_key)
 }
 
-pub fn handle_encrypt(db_lock: Arc<Mutex<DB>>, identity: &u32, plaintext: &String) -> String {
+pub fn handle_encrypt(db_lock: Arc<Mutex<DB>>, identity: &u32, plaintext: &str) -> Vec<u8> {
     let id_array = identity.to_ne_bytes();
     let recipient = retrieve_identity(db_lock, id_array);
     let public_key = import_public_key_from_binary(&recipient.public_key).unwrap();
-    hex::encode(encrypt(public_key, plaintext.as_bytes().to_vec()))
+    encrypt(public_key, plaintext.as_bytes().to_vec())
 }
 
-pub fn handle_decrypt(ciphertext: &String, private_key: rsa::RsaPrivateKey) -> String {
-    let decrypted = decrypt(&private_key, hex::decode(ciphertext).unwrap());
+pub fn handle_decrypt(ciphertext: Vec<u8>, private_key: &rsa::RsaPrivateKey) -> String {
+    let decrypted = decrypt(private_key, ciphertext);
     String::from(str::from_utf8(&decrypted).unwrap())
 }
 
-pub fn handle_sign(message: &String, private_key: rsa::RsaPrivateKey) -> String {
+pub fn handle_sign(message: &str, private_key: rsa::RsaPrivateKey) -> String {
     hex::encode(sign(private_key, message.as_bytes().to_vec()))
 }
 
 pub fn handle_verify(
     db_lock: Arc<Mutex<DB>>,
-    message: &String,
-    signature: &String,
+    message: &str,
+    signature: &str,
     identity: &u32,
 ) -> bool {
     let id_array = identity.to_ne_bytes();
@@ -207,6 +242,6 @@ pub fn handle_verify(
     verify(
         public_key,
         message.as_bytes().to_vec(),
-        hex::decode::<&String>(signature).unwrap(),
+        hex::decode::<&String>(&String::from(signature)).unwrap(),
     )
 }
