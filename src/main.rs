@@ -42,6 +42,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
             )
         }
 
+        Commands::GenerateEncryptionChannel { identity } => {}
+        Commands::AcceptEncryptionChannel {
+            identity,
+            public_key,
+        } => {}
+
         Commands::Sign { message } => println!("{}", handle_sign(message, private_key)),
         Commands::Verify {
             message,

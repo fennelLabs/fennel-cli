@@ -16,6 +16,11 @@ pub enum Commands {
     Decrypt { ciphertext: String },
 
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
+    GenerateEncryptionChannel { identity: u32 },
+    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
+    AcceptEncryptionChannel { identity: u32, public_key: String },
+
+    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     Verify {
         message: String,
         signature: String,

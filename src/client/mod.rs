@@ -3,7 +3,8 @@ mod tests;
 
 use codec::{Decode, Encode};
 use fennel_lib::{
-    export_keypair_to_file, export_public_key_to_binary, generate_keypair, hash,
+    export_keypair_to_file, export_public_key_to_binary, generate_keypair,
+    get_ephemeral_public_key, get_ephemeral_secret, get_shared_secret, hash,
     import_keypair_from_file, import_public_key_from_binary, insert_identity, insert_message,
     retrieve_identity, retrieve_messages,
     rsa_tools::{decrypt, encrypt},
@@ -247,4 +248,21 @@ pub fn handle_verify(
         message.as_bytes().to_vec(),
         hex::decode::<&String>(&String::from(signature)).unwrap(),
     )
+}
+
+pub fn handle_diffie_hellman_one(db_lock: Arc<Mutex<DB>>, identity: u32) {
+    let secret = get_ephemeral_secret();
+    let public = get_ephemeral_public_key(secret);
+    let identity = match retrieve_identity(db_lock, id) {
+        Ok()
+    }
+}
+
+pub fn handle_diffie_hellman_two(
+    db_lock: Arc<Mutex<DB>>,
+    secret: EphemeralSecret,
+    identity: u32,
+    public_key: String,
+) {
+    let shared_secret = get_shared_secret(secret, public_key);
 }
