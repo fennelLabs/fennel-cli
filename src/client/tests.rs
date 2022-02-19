@@ -23,6 +23,7 @@ fn test_handle_encrypt_and_decrypt() {
         id: [0; 4],
         fingerprint: [0; 16],
         public_key: key_bytes,
+        shared_secret_key: [0; 32],
     };
     insert_identity(db, &identity).expect("failed identity insertion");
 
@@ -43,6 +44,7 @@ fn test_handle_sign_and_verify() {
         id: [0; 4],
         fingerprint: [0; 16],
         public_key: key_bytes,
+        shared_secret_key: [0; 32],
     };
     insert_identity(db, &identity).expect("failed identity insertion");
 
@@ -72,6 +74,7 @@ fn test_handle_backlog_decrypt() {
         id: [9, 0, 0, 0],
         fingerprint,
         public_key: export_public_key_to_binary(&public_key).unwrap(),
+        shared_secret_key: [0; 32],
     };
 
     insert_identity(identity_db_clone, &identity).expect("failed to insert identity");
@@ -116,6 +119,7 @@ fn test_handle_backlog_decrypt() {
         id: [9, 0, 0, 0],
         fingerprint: fingerprint,
         public_key: export_public_key_to_binary(&public_key).unwrap(),
+        shared_secret_key: [0; 32],
     };
 
     handle_backlog_decrypt(

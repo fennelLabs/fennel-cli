@@ -326,12 +326,13 @@ dependencies = [
  "sha3",
  "slice-of-array",
  "tokio",
+ "x25519-dalek",
 ]
 
 [[package]]
 name = "fennel-lib"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/fennel-lib?branch=master#0f54561f746e54dc65f0449212cb2d449adaf1ca"
+source = "git+https://github.com/fennelLabs/fennel-lib?branch=master#55955daf08948833cf8522e694fa066f7791e128"
 dependencies = [
  "base64",
  "bincode",

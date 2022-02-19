@@ -12,6 +12,7 @@ use fennel_lib::{
 };
 use rocksdb::DB;
 use rsa::RsaPrivateKey;
+use x25519_dalek::{EphemeralSecret, PublicKey};
 use std::panic;
 use std::str;
 use std::{
@@ -109,6 +110,7 @@ async fn submit_identity(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'st
             id: packet.identity,
             fingerprint: packet.fingerprint,
             public_key: packet.public_key,
+            shared_secret_key: [0; 32],
         }),
     );
     match r {
@@ -250,12 +252,9 @@ pub fn handle_verify(
     )
 }
 
-pub fn handle_diffie_hellman_one(db_lock: Arc<Mutex<DB>>, identity: u32) {
+pub fn handle_diffie_hellman_one() {
     let secret = get_ephemeral_secret();
-    let public = get_ephemeral_public_key(secret);
-    let identity = match retrieve_identity(db_lock, id) {
-        Ok()
-    }
+    let public = get_ephemeral_public_key(&secret);
 }
 
 pub fn handle_diffie_hellman_two(
@@ -264,5 +263,7 @@ pub fn handle_diffie_hellman_two(
     identity: u32,
     public_key: String,
 ) {
-    let shared_secret = get_shared_secret(secret, public_key);
+    let key_bytes: [u8; 32] = hex::decode(public_key).unwrap().try_into().unwrap();
+    let parsed_public_key = PublicKey::from(key_bytes);
+    let shared_secret = get_shared_secret(secret, &parsed_public_key);
 }

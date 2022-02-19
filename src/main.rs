@@ -65,6 +65,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 id: identity.to_ne_bytes(),
                 fingerprint,
                 public_key: export_public_key_to_binary(&public_key).unwrap(),
+                shared_secret_key: [0; 32],
             },
             private_key,
         ),
