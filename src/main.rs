@@ -6,8 +6,9 @@ use std::{error::Error, sync::Arc};
 
 use clap::Parser;
 use client::{
-    handle_backlog_decrypt, handle_connection, handle_decrypt, handle_encrypt,
-    handle_generate_keypair, handle_sign, handle_verify,
+    handle_aes_encrypt, handle_backlog_decrypt, handle_connection, handle_decrypt,
+    handle_diffie_hellman_one, handle_diffie_hellman_two, handle_encrypt, handle_generate_keypair,
+    handle_sign, handle_verify,
 };
 use command::{Cli, Commands};
 use fennel_lib::{
@@ -15,6 +16,8 @@ use fennel_lib::{
     FennelServerPacket, Identity,
 };
 use tokio::net::TcpStream;
+
+use crate::client::{handle_aes_decrypt, prep_cipher};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -42,11 +45,51 @@ async fn main() -> Result<(), Box<dyn Error>> {
             )
         }
 
-        Commands::GenerateEncryptionChannel { identity } => {}
+        Commands::GenerateEncryptionChannel {} => {
+            let (secret, public) = handle_diffie_hellman_one();
+            println!(
+                "Secret key (KEEP THIS SAFE): {}",
+                hex::encode(secret.to_bytes())
+            );
+            println!(
+                "Public key (SHARE THIS): {}",
+                hex::encode(public.as_bytes())
+            );
+        }
         Commands::AcceptEncryptionChannel {
-            identity,
+            secret_key,
             public_key,
-        } => {}
+        } => {
+            let shared_secret =
+                handle_diffie_hellman_two(secret_key.to_string(), public_key.to_string());
+            println!(
+                "Shared secret (KEEP THIS SAFE): {}",
+                hex::encode(shared_secret.as_bytes())
+            );
+        }
+
+        Commands::AESEncrypt {
+            secret,
+            public_key,
+            plaintext,
+        } => {
+            let cipher = prep_cipher(secret.to_string(), public_key.to_string());
+            println!(
+                "{}",
+                hex::encode(handle_aes_encrypt(cipher, plaintext.to_string()))
+            );
+        }
+        Commands::AESDecrypt {
+            secret,
+            public_key,
+            ciphertext,
+        } => {
+            let cipher = prep_cipher(secret.to_string(), public_key.to_string());
+            println!(
+                "{}",
+                handle_aes_decrypt(cipher, hex::decode(ciphertext).unwrap())
+            );
+        }
 
         Commands::Sign { message } => println!("{}", handle_sign(message, private_key)),
         Commands::Verify {

@@ -16,9 +16,25 @@ pub enum Commands {
     Decrypt { ciphertext: String },
 
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    GenerateEncryptionChannel { identity: u32 },
+    GenerateEncryptionChannel {},
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    AcceptEncryptionChannel { identity: u32, public_key: String },
+    AcceptEncryptionChannel {
+        secret_key: String,
+        public_key: String,
+    },
+
+    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
+    AESEncrypt {
+        secret: String,
+        public_key: String,
+        plaintext: String,
+    },
+    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
+    AESDecrypt {
+        secret: String,
+        public_key: String,
+        ciphertext: String,
+    },
 
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     Verify {
