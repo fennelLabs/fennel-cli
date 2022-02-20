@@ -3,11 +3,12 @@ mod tests;
 
 use codec::{Decode, Encode};
 use fennel_lib::{
-    export_keypair_to_file, export_public_key_to_binary, generate_keypair, hash,
+    aes_decrypt, aes_encrypt, export_keypair_to_file, export_public_key_to_binary,
+    generate_keypair, get_session_public_key, get_session_secret, get_shared_secret, hash,
     import_keypair_from_file, import_public_key_from_binary, insert_identity, insert_message,
     retrieve_identity, retrieve_messages,
     rsa_tools::{decrypt, encrypt},
-    sign, verify, FennelServerPacket, Identity, Message,
+    sign, verify, AESCipher, FennelServerPacket, Identity, Message,
 };
 use rocksdb::DB;
 use rsa::RsaPrivateKey;
@@ -18,6 +19,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 use tokio::{io::*, net::TcpStream};
+use x25519_dalek::{PublicKey, SharedSecret, StaticSecret};
 
 pub async fn handle_connection(
     identity_db: Arc<Mutex<DB>>,
@@ -108,6 +110,7 @@ async fn submit_identity(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'st
             id: packet.identity,
             fingerprint: packet.fingerprint,
             public_key: packet.public_key,
+            shared_secret_key: [0; 32],
         }),
     );
     match r {
@@ -247,4 +250,35 @@ pub fn handle_verify(
         message.as_bytes().to_vec(),
         hex::decode::<&String>(&String::from(signature)).unwrap(),
     )
+}
+
+fn parse_shared_secret(secret: String, public_key: String) -> SharedSecret {
+    let secret_key_bytes: [u8; 32] = hex::decode(secret).unwrap().try_into().unwrap();
+    let parsed_secret_key = StaticSecret::from(secret_key_bytes);
+    let key_bytes: [u8; 32] = hex::decode(public_key).unwrap().try_into().unwrap();
+    let parsed_public_key = PublicKey::from(key_bytes);
+    get_shared_secret(parsed_secret_key, &parsed_public_key)
+}
+
+pub fn prep_cipher(secret: String, public_key: String) -> AESCipher {
+    let shared_secret = parse_shared_secret(secret, public_key);
+    AESCipher::new_from_shared_secret(shared_secret.as_bytes())
+}
+
+pub fn handle_aes_encrypt(cipher: AESCipher, plaintext: String) -> Vec<u8> {
+    aes_encrypt(&cipher.encrypt_key, cipher.iv, plaintext)
+}
+
+pub fn handle_aes_decrypt(cipher: AESCipher, ciphertext: Vec<u8>) -> String {
+    aes_decrypt(&cipher.decrypt_key, cipher.iv, ciphertext)
+}
+
+pub fn handle_diffie_hellman_one() -> (StaticSecret, PublicKey) {
+    let secret = get_session_secret();
+    let public = get_session_public_key(&secret);
+    (secret, public)
+}
+
+pub fn handle_diffie_hellman_two(secret: String, public_key: String) -> SharedSecret {
+    parse_shared_secret(secret, public_key)
 }

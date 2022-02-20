@@ -6,9 +6,12 @@ use fennel_lib::{
     Message,
 };
 
-use crate::client::{handle_sign, handle_verify};
+use crate::client::{handle_sign, handle_verify, prep_cipher};
 
-use super::{handle_backlog_decrypt, handle_decrypt, handle_encrypt, handle_generate_keypair};
+use super::{
+    handle_aes_decrypt, handle_aes_encrypt, handle_backlog_decrypt, handle_decrypt,
+    handle_diffie_hellman_one, handle_diffie_hellman_two, handle_encrypt, handle_generate_keypair,
+};
 
 #[test]
 /// Tests the processes for generating keys, encrypting text, and decrypting the resulting ciphertext.
@@ -23,6 +26,7 @@ fn test_handle_encrypt_and_decrypt() {
         id: [0; 4],
         fingerprint: [0; 16],
         public_key: key_bytes,
+        shared_secret_key: [0; 32],
     };
     insert_identity(db, &identity).expect("failed identity insertion");
 
@@ -43,6 +47,7 @@ fn test_handle_sign_and_verify() {
         id: [0; 4],
         fingerprint: [0; 16],
         public_key: key_bytes,
+        shared_secret_key: [0; 32],
     };
     insert_identity(db, &identity).expect("failed identity insertion");
 
@@ -72,6 +77,7 @@ fn test_handle_backlog_decrypt() {
         id: [9, 0, 0, 0],
         fingerprint,
         public_key: export_public_key_to_binary(&public_key).unwrap(),
+        shared_secret_key: [0; 32],
     };
 
     insert_identity(identity_db_clone, &identity).expect("failed to insert identity");
@@ -116,6 +122,7 @@ fn test_handle_backlog_decrypt() {
         id: [9, 0, 0, 0],
         fingerprint: fingerprint,
         public_key: export_public_key_to_binary(&public_key).unwrap(),
+        shared_secret_key: [0; 32],
     };
 
     handle_backlog_decrypt(
@@ -124,4 +131,23 @@ fn test_handle_backlog_decrypt() {
         identity_copy,
         private_key_loaded,
     );
+}
+
+#[test]
+fn test_diffie_hellman() {
+    let (secret_key, public_key) = handle_diffie_hellman_one();
+    let secret = hex::encode(secret_key.to_bytes());
+    let public = hex::encode(public_key.to_bytes());
+    let shared1 = handle_diffie_hellman_two(secret.clone(), public.clone());
+    let shared2 = handle_diffie_hellman_two(secret.clone(), public.clone());
+    assert_eq!(shared1.as_bytes(), shared2.as_bytes());
+
+    let cipher = prep_cipher(secret.clone(), public.clone());
+    let ciphertext = handle_aes_encrypt(cipher, String::from("This is a test."));
+    let ciphertext_hex = hex::encode(ciphertext);
+
+    let cipher = prep_cipher(secret, public);
+    let plaintext = handle_aes_decrypt(cipher, hex::decode(ciphertext_hex).unwrap());
+
+    assert_eq!(String::from("This is a test."), plaintext);
 }
