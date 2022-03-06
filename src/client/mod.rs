@@ -287,14 +287,22 @@ pub fn handle_diffie_hellman_two(secret: String, public_key: String) -> SharedSe
     parse_shared_secret(secret, public_key)
 }
 
-pub fn handle_diffie_hellman_encrypt(db_lock: Arc<Mutex<DB>>, identity: &u32, plaintext: &str) -> Vec<u8> {
+pub fn handle_diffie_hellman_encrypt(
+    db_lock: Arc<Mutex<DB>>,
+    identity: &u32,
+    plaintext: &str,
+) -> Vec<u8> {
     let id_array = identity.to_ne_bytes();
     let recipient = retrieve_identity(db_lock, id_array);
     let cipher = prep_cipher_from_secret(&recipient.shared_secret_key);
     handle_aes_encrypt(cipher, plaintext.to_string())
 }
 
-pub fn handle_diffie_hellman_decrypt(db_lock: Arc<Mutex<DB>>, identity: &u32, ciphertext: Vec<u8>) -> String {
+pub fn handle_diffie_hellman_decrypt(
+    db_lock: Arc<Mutex<DB>>,
+    identity: &u32,
+    ciphertext: Vec<u8>,
+) -> String {
     let id_array = identity.to_ne_bytes();
     let recipient = retrieve_identity(db_lock, id_array);
     let cipher = prep_cipher_from_secret(&recipient.shared_secret_key);

@@ -12,8 +12,8 @@ use client::{
 };
 use command::{Cli, Commands};
 use fennel_lib::{
-    export_public_key_to_binary, get_identity_database_handle, get_message_database_handle, sign,
-    FennelServerPacket, Identity, retrieve_identity, insert_identity,
+    export_public_key_to_binary, get_identity_database_handle, get_message_database_handle,
+    insert_identity, retrieve_identity, sign, FennelServerPacket, Identity,
 };
 use tokio::net::TcpStream;
 
@@ -66,9 +66,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let mut identity = retrieve_identity(identity_db.clone(), identity_id.to_ne_bytes());
             identity.shared_secret_key = shared_secret.to_bytes();
             insert_identity(identity_db, &identity).unwrap();
-            println!(
-                "Encryption channel ready"
-            );
+            println!("Encryption channel ready");
         }
 
         Commands::AESEncrypt {
