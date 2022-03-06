@@ -19,6 +19,7 @@ pub enum Commands {
     GenerateEncryptionChannel {},
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     AcceptEncryptionChannel {
+        identity_id: u32,
         secret_key: String,
         public_key: String,
     },

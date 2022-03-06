@@ -13,7 +13,7 @@ use client::{
 use command::{Cli, Commands};
 use fennel_lib::{
     export_public_key_to_binary, get_identity_database_handle, get_message_database_handle, sign,
-    FennelServerPacket, Identity,
+    FennelServerPacket, Identity, retrieve_identity, insert_identity,
 };
 use tokio::net::TcpStream;
 
@@ -57,14 +57,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
             );
         }
         Commands::AcceptEncryptionChannel {
+            identity_id,
             secret_key,
             public_key,
         } => {
             let shared_secret =
                 handle_diffie_hellman_two(secret_key.to_string(), public_key.to_string());
+            let mut identity = retrieve_identity(identity_db.clone(), identity_id.to_ne_bytes());
+            identity.shared_secret_key = shared_secret.to_bytes();
+            insert_identity(identity_db, &identity).unwrap();
             println!(
-                "Shared secret (KEEP THIS SAFE): {}",
-                hex::encode(shared_secret.as_bytes())
+                "Encryption channel ready"
             );
         }
 
