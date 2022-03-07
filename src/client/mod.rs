@@ -129,6 +129,7 @@ async fn send_message(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'stati
             signature: packet.signature,
             public_key: packet.public_key,
             recipient_id: packet.recipient,
+            message_type: [0],
         },
     );
     match r {
@@ -270,11 +271,11 @@ pub fn prep_cipher_from_secret(shared_secret: &[u8; 32]) -> AESCipher {
 }
 
 pub fn handle_aes_encrypt(cipher: AESCipher, plaintext: String) -> Vec<u8> {
-    aes_encrypt(&cipher.encrypt_key, cipher.iv, plaintext)
+    aes_encrypt(&cipher.encrypt_key, plaintext)
 }
 
 pub fn handle_aes_decrypt(cipher: AESCipher, ciphertext: Vec<u8>) -> String {
-    aes_decrypt(&cipher.decrypt_key, cipher.iv, ciphertext)
+    aes_decrypt(&cipher.decrypt_key, ciphertext)
 }
 
 pub fn handle_diffie_hellman_one() -> (StaticSecret, PublicKey) {
