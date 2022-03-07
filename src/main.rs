@@ -68,6 +68,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             insert_identity(identity_db, &identity).unwrap();
             println!("Encryption channel ready");
         }
+        Commands::SendSecureMessage {} => {}
+        Commands::ReceiveSecureMessages {} => {}
 
         Commands::AESEncrypt {
             secret,
