@@ -90,7 +90,6 @@ fn test_handle_backlog_decrypt() {
     let ciphertext = handle_encrypt(identity_db_4, &9, &String::from("This is a test"));
     let ciphertext_array = ciphertext.to_owned();
     let ciphertext_sign = ciphertext.to_owned();
-    println!("{}", ciphertext_array.len());
 
     let message = Message {
         sender_id: [9, 0, 0, 0],
@@ -102,6 +101,7 @@ fn test_handle_backlog_decrypt() {
             .unwrap(),
         public_key: export_public_key_to_binary(&public_key).unwrap(),
         recipient_id: [9, 0, 0, 0],
+        message_type: [0],
     };
 
     insert_message(message_db, message).expect("failed to insert message");
