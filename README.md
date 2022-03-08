@@ -1,8 +1,5 @@
 # fennel-cli
 ```
-virtualenv -p python3 venv
+cargo build --release
 
-source venv/bin/activate
-
-pip install -r requirements.txt
 ```
