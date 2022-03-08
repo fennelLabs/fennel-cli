@@ -174,6 +174,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let listener: TcpStream = TcpStream::connect("127.0.0.1:7878").await?;
             handle_connection(identity_db, message_db, listener, packet).await?
         }
+        Commands::DownloadInsertIdentity { id} => {
+            //Firt, we'll need to make RPC call to fennel-lib's fetch_public_keys
+
+            let packet = FennelServerPacket {
+                command: [4; 1],
+                identity: id.to_ne_bytes(),
+                fingerprint,
+                message: [0; 1024],
+                signature: sign(private_key, [0; 1024].to_vec()).try_into().unwrap(),
+                public_key: export_public_key_to_binary(&public_key).unwrap(),
+                recipient: [0; 4],
+            };
+            let listener: TcpStream = TcpStream::connect("127.0.0.1:7878").await?;
+            handle_connection(identity_db, message_db, listener, packet).await?
+        }
     }
 
     Ok(())

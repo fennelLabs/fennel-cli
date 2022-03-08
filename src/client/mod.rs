@@ -77,6 +77,8 @@ pub async fn handle_connection(
         put_messages(message_db, parse_remote_messages(response).await)
             .await
             .expect("failed to commit messages");
+    } else if server_packet.command == [4] {
+        println!("Download Insert Identity");
     } else {
         println!("invalid command code");
     }
