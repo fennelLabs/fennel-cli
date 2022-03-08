@@ -1,5 +1,6 @@
 # fennel-cli
 ```
-cargo build --release
+cargo run
 
+target/debug/fennel-cli help
 ```
