@@ -50,12 +50,12 @@ pub async fn handle_connection(
     } else if server_packet.command == [2] {
         stream.write_all(&server_packet.encode()).await?;
         println!("sent");
-        let mut response: Vec<[u8; 3110]> = Vec::new();
+        let mut response: Vec<[u8; 3111]> = Vec::new();
         let mut end = [255];
         stream.read_exact(&mut end).await?;
         while end != [0] {
             println!("{} messages remaining", end[0]);
-            let mut message_buffer = [0; 3110];
+            let mut message_buffer = [0; 3111];
             let mut server_hash = [0; 64];
             let mut intermediate_response_code = [0; 1];
             stream.read_exact(&mut end).await?;
@@ -129,7 +129,7 @@ async fn send_message(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'stati
             signature: packet.signature,
             public_key: packet.public_key,
             recipient_id: packet.recipient,
-            message_type: [0],
+            message_type: packet.message_type,
         },
     );
     match r {
@@ -138,7 +138,7 @@ async fn send_message(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'stati
     }
 }
 
-async fn parse_remote_messages(messages_response: Vec<[u8; 3110]>) -> Vec<Message> {
+async fn parse_remote_messages(messages_response: Vec<[u8; 3111]>) -> Vec<Message> {
     let mut message_list: Vec<Message> = Vec::new();
     for message in messages_response {
         let unpacked_message: Message = Decode::decode(&mut (message.as_slice())).unwrap();
@@ -184,10 +184,17 @@ pub fn handle_backlog_decrypt(
                 message.signature.to_vec()
             )
         );
-        println!(
-            "{:?}",
-            handle_decrypt(message.message.to_vec(), &private_key)
-        );
+        if message.message_type == [1] {
+            println!(
+                "{:?}",
+                handle_decrypt(message.message.to_vec(), &private_key)
+            );
+        } else if message.message_type == [2] {
+            println!(
+                "{:?}",
+                handle_diffie_hellman_decrypt(Arc::clone(&identity_db), message.sender_id, message.message.to_vec())
+            );
+        }
         println!();
     }
 }
@@ -301,11 +308,10 @@ pub fn handle_diffie_hellman_encrypt(
 
 pub fn handle_diffie_hellman_decrypt(
     db_lock: Arc<Mutex<DB>>,
-    identity: &u32,
+    identity: [u8; 4],
     ciphertext: Vec<u8>,
 ) -> String {
-    let id_array = identity.to_ne_bytes();
-    let recipient = retrieve_identity(db_lock, id_array);
+    let recipient = retrieve_identity(db_lock, identity);
     let cipher = prep_cipher_from_secret(&recipient.shared_secret_key);
     handle_aes_decrypt(cipher, ciphertext)
 }

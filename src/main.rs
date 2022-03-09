@@ -7,8 +7,8 @@ use std::{error::Error, sync::Arc};
 use clap::Parser;
 use client::{
     handle_aes_encrypt, handle_backlog_decrypt, handle_connection, handle_decrypt,
-    handle_diffie_hellman_one, handle_diffie_hellman_two, handle_encrypt, handle_generate_keypair,
-    handle_sign, handle_verify,
+    handle_diffie_hellman_encrypt, handle_diffie_hellman_one, handle_diffie_hellman_two,
+    handle_encrypt, handle_generate_keypair, handle_sign, handle_verify,
 };
 use command::{Cli, Commands};
 use fennel_lib::{
@@ -68,8 +68,26 @@ async fn main() -> Result<(), Box<dyn Error>> {
             insert_identity(identity_db, &identity).unwrap();
             println!("Encryption channel ready");
         }
-        Commands::SendSecureMessage {} => {}
-        Commands::ReceiveSecureMessages {} => {}
+        Commands::SendSecureMessage {
+            sender_id,
+            message,
+            recipient_id,
+        } => {
+            let identity_db_2 = Arc::clone(&identity_db);
+            let ciphertext = handle_diffie_hellman_encrypt(identity_db, recipient_id, message);
+            let packet = FennelServerPacket {
+                command: [1; 1],
+                identity: sender_id.to_ne_bytes(),
+                fingerprint,
+                message: ciphertext.to_owned().try_into().unwrap(),
+                signature: sign(private_key, ciphertext).to_vec().try_into().unwrap(),
+                public_key: export_public_key_to_binary(&public_key).unwrap(),
+                recipient: recipient_id.to_ne_bytes(),
+                message_type: [2; 1],
+            };
+            let listener: TcpStream = TcpStream::connect("127.0.0.1:7878").await?;
+            handle_connection(identity_db_2, message_db, listener, packet).await?
+        }
 
         Commands::AESEncrypt {
             secret,
@@ -125,6 +143,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 signature: sign(private_key, [0; 1024].to_vec()).try_into().unwrap(),
                 public_key: export_public_key_to_binary(&public_key).unwrap(),
                 recipient: [0; 4],
+                message_type: [0; 1],
             };
             let listener: TcpStream = TcpStream::connect("127.0.0.1:7878").await?;
             handle_connection(identity_db, message_db, listener, packet).await?
@@ -144,6 +163,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 signature: sign(private_key, ciphertext).to_vec().try_into().unwrap(),
                 public_key: export_public_key_to_binary(&public_key).unwrap(),
                 recipient: recipient_id.to_ne_bytes(),
+                message_type: [1; 1],
             };
             let listener: TcpStream = TcpStream::connect("127.0.0.1:7878").await?;
             handle_connection(identity_db_2, message_db, listener, packet).await?
@@ -157,6 +177,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 signature: sign(private_key, [0; 1024].to_vec()).try_into().unwrap(),
                 public_key: export_public_key_to_binary(&public_key).unwrap(),
                 recipient: [0; 4],
+                message_type: [0; 1],
             };
             let listener: TcpStream = TcpStream::connect("127.0.0.1:7878").await?;
             handle_connection(identity_db, message_db, listener, packet).await?
@@ -170,6 +191,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 signature: sign(private_key, [0; 1024].to_vec()).try_into().unwrap(),
                 public_key: export_public_key_to_binary(&public_key).unwrap(),
                 recipient: [0; 4],
+                message_type: [0; 1],
             };
             let listener: TcpStream = TcpStream::connect("127.0.0.1:7878").await?;
             handle_connection(identity_db, message_db, listener, packet).await?

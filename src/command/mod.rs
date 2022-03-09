@@ -25,9 +25,11 @@ pub enum Commands {
     },
 
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    SendSecureMessage {},
-    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    ReceiveSecureMessages {},
+    SendSecureMessage {
+        sender_id: u32,
+        message: String,
+        recipient_id: u32,
+    },
 
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     AESEncrypt {
