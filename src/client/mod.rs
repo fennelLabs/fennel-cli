@@ -8,7 +8,7 @@ use fennel_lib::{
     import_keypair_from_file, import_public_key_from_binary, insert_identity, insert_message,
     retrieve_identity, retrieve_messages,
     rsa_tools::{decrypt, encrypt},
-    sign, verify, AESCipher, FennelServerPacket, Identity, Message,
+    sign, verify, AESCipher, FennelServerPacket, Identity, Message, TransactionHandler,
 };
 use rocksdb::DB;
 use rsa::RsaPrivateKey;
@@ -31,6 +31,7 @@ pub async fn handle_connection(
     if !verify_packet_signature(&server_packet) {
         panic!("server packet signature failed to verify");
     }
+    //println!("{}", server_packet.command.to_string());
     if server_packet.command == [0] {
         let r = submit_identity(identity_db, server_packet).await;
         if r != [0] {
@@ -79,6 +80,7 @@ pub async fn handle_connection(
             .expect("failed to commit messages");
     } else if server_packet.command == [4] {
         println!("Download Insert Identity");
+        //TransactionHandler::fetch_public_keys();
     } else {
         println!("invalid command code");
     }

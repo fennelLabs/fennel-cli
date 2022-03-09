@@ -13,7 +13,7 @@ use client::{
 use command::{Cli, Commands};
 use fennel_lib::{
     export_public_key_to_binary, get_identity_database_handle, get_message_database_handle,
-    insert_identity, retrieve_identity, sign, FennelServerPacket, Identity,
+    insert_identity, retrieve_identity, sign, FennelServerPacket, Identity, TransactionHandler,
 };
 use tokio::net::TcpStream;
 
@@ -174,10 +174,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let listener: TcpStream = TcpStream::connect("127.0.0.1:7878").await?;
             handle_connection(identity_db, message_db, listener, packet).await?
         }
-        Commands::DownloadInsertIdentity { id } => {
+        Commands::DownloadInsertIdentity {} => {
+            println!("Execute DownloadInsertIdentity");
+            TransactionHandler::fetch_public_keys().await?;
             //Firt, we'll need to make RPC call to fennel-lib's fetch_public_keys
 
-            let packet = FennelServerPacket {
+            /*let packet = FennelServerPacket {
                 command: [4; 1],
                 identity: id.to_ne_bytes(),
                 fingerprint,
@@ -187,7 +189,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 recipient: [0; 4],
             };
             let listener: TcpStream = TcpStream::connect("127.0.0.1:7878").await?;
-            handle_connection(identity_db, message_db, listener, packet).await?
+            handle_connection(identity_db, message_db, listener, packet).await?*/
         }
     }
 
