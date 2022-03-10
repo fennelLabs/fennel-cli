@@ -13,7 +13,8 @@ use crate::client::{
 
 use super::{
     handle_aes_decrypt, handle_aes_encrypt, handle_backlog_decrypt, handle_decrypt,
-    handle_diffie_hellman_one, handle_diffie_hellman_two, handle_encrypt, handle_generate_keypair, pack_message, unpack_message,
+    handle_diffie_hellman_one, handle_diffie_hellman_two, handle_encrypt, handle_generate_keypair,
+    pack_message, unpack_message,
 };
 
 #[test]
@@ -243,7 +244,7 @@ fn test_handle_backlog_decrypt_with_dh() {
 
 #[test]
 fn test_pack_message() {
-    let test = vec![1,2,3,4,5];
+    let test = vec![1, 2, 3, 4, 5];
     let packed_test = pack_message(test);
     assert_eq!(packed_test.len(), 1024);
     assert_eq!(packed_test[0], 5);
@@ -251,7 +252,7 @@ fn test_pack_message() {
 
 #[test]
 fn test_unpack_message() {
-    let test = vec![1,2,3,4,5];
+    let test = vec![1, 2, 3, 4, 5];
     let packed_test = pack_message(test.clone());
     let unpacked_test = unpack_message(packed_test.clone());
     assert_eq!(test, unpacked_test);

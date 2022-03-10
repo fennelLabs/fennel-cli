@@ -200,7 +200,11 @@ pub fn handle_backlog_decrypt(
         } else if message.message_type == [2] {
             println!(
                 "{:?}",
-                handle_diffie_hellman_decrypt(Arc::clone(&identity_db), message.sender_id, message.message.to_vec())
+                handle_diffie_hellman_decrypt(
+                    Arc::clone(&identity_db),
+                    message.sender_id,
+                    message.message.to_vec()
+                )
             );
         }
         println!();
