@@ -6,7 +6,10 @@ use fennel_lib::{
     Message,
 };
 
-use crate::client::{handle_sign, handle_verify, prep_cipher};
+use crate::client::{
+    handle_diffie_hellman_decrypt, handle_diffie_hellman_encrypt, handle_sign, handle_verify,
+    prep_cipher,
+};
 
 use super::{
     handle_aes_decrypt, handle_aes_encrypt, handle_backlog_decrypt, handle_decrypt,
@@ -150,4 +153,90 @@ fn test_diffie_hellman() {
     let plaintext = handle_aes_decrypt(cipher, hex::decode(ciphertext_hex).unwrap());
 
     assert_eq!(String::from("This is a test."), plaintext);
+}
+
+#[test]
+fn test_handle_backlog_decrypt_with_dh() {
+    let identity_db = get_identity_database_handle();
+    let identity_db_clone = Arc::clone(&identity_db);
+    let identity_db_2 = Arc::clone(&identity_db);
+    let identity_db_3 = Arc::clone(&identity_db);
+    let identity_db_4 = Arc::clone(&identity_db);
+    let message_db = get_message_database_handle();
+    let message_db_clone = Arc::clone(&message_db);
+    let message_db_2 = Arc::clone(&message_db);
+
+    let (secret_key, public_key) = handle_diffie_hellman_one();
+    let secret = hex::encode(secret_key.to_bytes());
+    let public = hex::encode(public_key.to_bytes());
+    let shared1 = handle_diffie_hellman_two(secret.clone(), public.clone());
+
+    let (fingerprint, private_key, public_key) = handle_generate_keypair();
+    let (_, private_key_loaded, public_key_loaded) = handle_generate_keypair();
+    assert_eq!(&private_key, &private_key_loaded);
+
+    let identity = Identity {
+        id: [9, 0, 0, 0],
+        fingerprint,
+        public_key: export_public_key_to_binary(&public_key).unwrap(),
+        shared_secret_key: shared1.to_bytes(),
+    };
+
+    insert_identity(identity_db_clone, &identity).expect("failed to insert identity");
+
+    let ciphertext_verify = handle_diffie_hellman_encrypt(
+        Arc::clone(&identity_db),
+        &9,
+        &String::from("This is a test"),
+    );
+    assert_eq!(
+        handle_diffie_hellman_decrypt(Arc::clone(&identity_db), [9, 0, 0, 0], ciphertext_verify),
+        String::from("This is a test")
+    );
+    let ciphertext =
+        handle_diffie_hellman_encrypt(identity_db_4, &9, &String::from("This is a test"));
+    let ciphertext_array = ciphertext.to_owned();
+    let ciphertext_sign = ciphertext.to_owned();
+    println!("{:?}", ciphertext_array.len());
+
+    let message = Message {
+        sender_id: [9, 0, 0, 0],
+        fingerprint,
+        message: ciphertext_array.try_into().unwrap(),
+        signature: sign(private_key, ciphertext_sign.try_into().unwrap())
+            .to_vec()
+            .try_into()
+            .unwrap(),
+        public_key: export_public_key_to_binary(&public_key).unwrap(),
+        recipient_id: [9, 0, 0, 0],
+        message_type: [2],
+    };
+
+    insert_message(message_db, message).expect("failed to insert message");
+
+    let received_identity = retrieve_identity(identity_db_3, [9, 0, 0, 0]);
+    assert_eq!(identity.fingerprint, received_identity.fingerprint);
+
+    let messages = retrieve_messages(message_db_2, identity);
+    let encoded_ciphertext: [u8; 1024] = ciphertext.try_into().unwrap();
+    assert!(verify(
+        public_key_loaded,
+        messages[0].message.to_vec(),
+        messages[0].signature.to_vec()
+    ));
+    assert_eq!(messages[0].message, encoded_ciphertext);
+
+    let identity_copy = Identity {
+        id: [9, 0, 0, 0],
+        fingerprint: fingerprint,
+        public_key: export_public_key_to_binary(&public_key).unwrap(),
+        shared_secret_key: [0; 32],
+    };
+
+    handle_backlog_decrypt(
+        message_db_clone,
+        identity_db_2,
+        identity_copy,
+        private_key_loaded,
+    );
 }

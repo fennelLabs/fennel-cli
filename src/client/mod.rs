@@ -303,7 +303,16 @@ pub fn handle_diffie_hellman_encrypt(
     let id_array = identity.to_ne_bytes();
     let recipient = retrieve_identity(db_lock, id_array);
     let cipher = prep_cipher_from_secret(&recipient.shared_secret_key);
-    handle_aes_encrypt(cipher, plaintext.to_string())
+    let mut ciphertext = handle_aes_encrypt(cipher, plaintext.to_string());
+    println!("{:?}", ciphertext.len());
+    let iprime: usize = ciphertext.len();
+    ciphertext.resize(1016, 0);
+    println!("{:?}", ciphertext);
+    let mut ciphertext_new = (iprime.to_ne_bytes()).to_vec();
+    ciphertext_new.extend(ciphertext);
+    println!("{:?}", ciphertext_new);
+    println!("{:?}", ciphertext_new.len());
+    ciphertext_new
 }
 
 pub fn handle_diffie_hellman_decrypt(
@@ -311,7 +320,13 @@ pub fn handle_diffie_hellman_decrypt(
     identity: [u8; 4],
     ciphertext: Vec<u8>,
 ) -> String {
+    println!("{:?}", ciphertext.len());
+    let ciphertext_lead: [u8; 8] = ciphertext[0..8].try_into().unwrap();
+    println!("{:?}", ciphertext.len());
+    let count = usize::from_ne_bytes(ciphertext_lead);
+    let ciphertext_mod = &ciphertext[0..count];
+    println!("{:?}", ciphertext_mod.len());
     let recipient = retrieve_identity(db_lock, identity);
     let cipher = prep_cipher_from_secret(&recipient.shared_secret_key);
-    handle_aes_decrypt(cipher, ciphertext)
+    handle_aes_decrypt(cipher, ciphertext_mod.to_vec())
 }
