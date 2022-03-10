@@ -21,6 +21,7 @@ use std::{
 use tokio::{io::*, net::TcpStream};
 use x25519_dalek::{PublicKey, SharedSecret, StaticSecret};
 
+/// Given the current CLI context, this procedure handles top-level networking and branching.
 pub async fn handle_connection(
     identity_db: Arc<Mutex<DB>>,
     message_db: Arc<Mutex<DB>>,
@@ -97,12 +98,14 @@ pub async fn handle_connection(
     Ok(())
 }
 
+/// Given a FennelServerPacket, make sure that the signature applies correctly.
 fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
     let pub_key =
         import_public_key_from_binary(&packet.public_key).expect("public key failed to import");
     verify(pub_key, packet.message.to_vec(), packet.signature.to_vec())
 }
 
+/// Provides a standardized access for adding identities to the database.
 async fn submit_identity(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'static [u8] {
     let r = insert_identity(
         db,
@@ -119,6 +122,7 @@ async fn submit_identity(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'st
     }
 }
 
+/// Extracts a message from a FennelServerPacket and commits it to the database.
 async fn send_message(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'static [u8] {
     let r = insert_message(
         db,
@@ -138,6 +142,7 @@ async fn send_message(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'stati
     }
 }
 
+/// Given a vector of binary-encoded messages, unpacks, decodes, and stores them.
 async fn parse_remote_messages(messages_response: Vec<[u8; 3111]>) -> Vec<Message> {
     let mut message_list: Vec<Message> = Vec::new();
     for message in messages_response {
@@ -153,11 +158,13 @@ async fn parse_remote_messages(messages_response: Vec<[u8; 3111]>) -> Vec<Messag
     message_list
 }
 
+/// Directly commits a vector of messages to the local database.
 async fn put_messages(messages_db: Arc<Mutex<DB>>, messages_list: Vec<Message>) -> Result<()> {
     insert_message_list(messages_db, messages_list).unwrap();
     Ok(())
 }
 
+/// Used internally to commit a list of messages to the local database.
 fn insert_message_list(messages_db: Arc<Mutex<DB>>, messages_list: Vec<Message>) -> Result<()> {
     for message in messages_list {
         let messages_db_clone = Arc::clone(&messages_db);
@@ -166,6 +173,7 @@ fn insert_message_list(messages_db: Arc<Mutex<DB>>, messages_list: Vec<Message>)
     Ok(())
 }
 
+/// Decrypts, verifies, and displays all messages received by the current user.
 pub fn handle_backlog_decrypt(
     message_db: Arc<Mutex<DB>>,
     identity_db: Arc<Mutex<DB>>,
@@ -199,6 +207,7 @@ pub fn handle_backlog_decrypt(
     }
 }
 
+/// Convenience wrapper for managing local key storage.
 pub fn handle_generate_keypair() -> ([u8; 16], rsa::RsaPrivateKey, rsa::RsaPublicKey) {
     let (private_key, public_key): (rsa::RsaPrivateKey, rsa::RsaPublicKey) =
         match import_keypair_from_file(
@@ -228,6 +237,7 @@ pub fn handle_generate_keypair() -> ([u8; 16], rsa::RsaPrivateKey, rsa::RsaPubli
     (fingerprint, private_key, public_key)
 }
 
+/// Handles RSA encryption.
 pub fn handle_encrypt(db_lock: Arc<Mutex<DB>>, identity: &u32, plaintext: &str) -> Vec<u8> {
     let id_array = identity.to_ne_bytes();
     let recipient = retrieve_identity(db_lock, id_array);
@@ -235,15 +245,18 @@ pub fn handle_encrypt(db_lock: Arc<Mutex<DB>>, identity: &u32, plaintext: &str) 
     encrypt(public_key, plaintext.as_bytes().to_vec())
 }
 
+/// Handles RSA decryption.
 pub fn handle_decrypt(ciphertext: Vec<u8>, private_key: &rsa::RsaPrivateKey) -> String {
     let decrypted = decrypt(private_key, ciphertext);
     String::from(str::from_utf8(&decrypted).unwrap())
 }
 
+/// Issues a signature based on the current user's identity.
 pub fn handle_sign(message: &str, private_key: rsa::RsaPrivateKey) -> String {
     hex::encode(sign(private_key, message.as_bytes().to_vec()))
 }
 
+/// Verifies a signature based on the identity it claims to be from.
 pub fn handle_verify(
     db_lock: Arc<Mutex<DB>>,
     message: &str,
@@ -260,6 +273,7 @@ pub fn handle_verify(
     )
 }
 
+/// Execute shared secret derivation given Diffie-Hellman factors.
 fn parse_shared_secret(secret: String, public_key: String) -> SharedSecret {
     let secret_key_bytes: [u8; 32] = hex::decode(secret).unwrap().try_into().unwrap();
     let parsed_secret_key = StaticSecret::from(secret_key_bytes);
@@ -268,33 +282,40 @@ fn parse_shared_secret(secret: String, public_key: String) -> SharedSecret {
     get_shared_secret(parsed_secret_key, &parsed_public_key)
 }
 
+/// Prepare a cipher based on the user's secret key and the contact's public key.
 pub fn prep_cipher(secret: String, public_key: String) -> AESCipher {
     let shared_secret = parse_shared_secret(secret, public_key);
     prep_cipher_from_secret(shared_secret.as_bytes())
 }
 
+/// Derives an AES cipher from a known shared secret.
 pub fn prep_cipher_from_secret(shared_secret: &[u8; 32]) -> AESCipher {
     AESCipher::new_from_shared_secret(shared_secret)
 }
 
+/// Uses a known cipher to execute AES encryption.
 pub fn handle_aes_encrypt(cipher: AESCipher, plaintext: String) -> Vec<u8> {
     aes_encrypt(&cipher.encrypt_key, plaintext)
 }
 
+/// Uses a known cipher to execute AES decryption.
 pub fn handle_aes_decrypt(cipher: AESCipher, ciphertext: Vec<u8>) -> String {
     aes_decrypt(&cipher.decrypt_key, ciphertext)
 }
 
+/// Creates a secret and public key for use in Diffie-Hellman.
 pub fn handle_diffie_hellman_one() -> (StaticSecret, PublicKey) {
     let secret = get_session_secret();
     let public = get_session_public_key(&secret);
     (secret, public)
 }
 
+/// Creates a shared secret from Diffie-Hellman factors.
 pub fn handle_diffie_hellman_two(secret: String, public_key: String) -> SharedSecret {
     parse_shared_secret(secret, public_key)
 }
 
+/// Given an identity with a known shared secret, execute Diffie-Hellman encryption.
 pub fn handle_diffie_hellman_encrypt(
     db_lock: Arc<Mutex<DB>>,
     identity: &u32,
@@ -303,30 +324,35 @@ pub fn handle_diffie_hellman_encrypt(
     let id_array = identity.to_ne_bytes();
     let recipient = retrieve_identity(db_lock, id_array);
     let cipher = prep_cipher_from_secret(&recipient.shared_secret_key);
-    let mut ciphertext = handle_aes_encrypt(cipher, plaintext.to_string());
-    println!("{:?}", ciphertext.len());
-    let iprime: usize = ciphertext.len();
-    ciphertext.resize(1016, 0);
-    println!("{:?}", ciphertext);
-    let mut ciphertext_new = (iprime.to_ne_bytes()).to_vec();
-    ciphertext_new.extend(ciphertext);
-    println!("{:?}", ciphertext_new);
-    println!("{:?}", ciphertext_new.len());
-    ciphertext_new
+    let ciphertext = handle_aes_encrypt(cipher, plaintext.to_string());
+    pack_message(ciphertext)
 }
 
+/// Given an identity with a known shared secret, execute Diffie-Hellman decryption.
 pub fn handle_diffie_hellman_decrypt(
     db_lock: Arc<Mutex<DB>>,
     identity: [u8; 4],
     ciphertext: Vec<u8>,
 ) -> String {
-    println!("{:?}", ciphertext.len());
-    let ciphertext_lead: [u8; 8] = ciphertext[0..8].try_into().unwrap();
-    println!("{:?}", ciphertext.len());
-    let count = usize::from_ne_bytes(ciphertext_lead);
-    let ciphertext_mod = &ciphertext[0..count];
-    println!("{:?}", ciphertext_mod.len());
-    let recipient = retrieve_identity(db_lock, identity);
-    let cipher = prep_cipher_from_secret(&recipient.shared_secret_key);
+    let ciphertext_mod = unpack_message(ciphertext);
+    let sender = retrieve_identity(db_lock, identity);
+    let cipher = prep_cipher_from_secret(&sender.shared_secret_key);
     handle_aes_decrypt(cipher, ciphertext_mod.to_vec())
+}
+
+/// Prepares a short message for transmission as a FennelServerPacket.
+pub fn pack_message(mut ciphertext: Vec<u8>) -> Vec<u8> {
+    let iprime: usize = ciphertext.len();
+    ciphertext.resize(1016, 0);
+    let mut ciphertext_new = (iprime.to_ne_bytes()).to_vec();
+    ciphertext_new.extend(ciphertext);
+    ciphertext_new
+}
+
+/// Retrieves an original message from packet padding.
+pub fn unpack_message(ciphertext: Vec<u8>) -> Vec<u8> {
+    let ciphertext_lead: [u8; 8] = ciphertext[0..8].try_into().unwrap();
+    let count = 8 + usize::from_ne_bytes(ciphertext_lead);
+    let ciphertext_mod = &ciphertext[8..count];
+    ciphertext_mod.to_vec()
 }
