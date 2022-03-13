@@ -40,6 +40,17 @@ pub async fn handle_connection(
         stream.write_all(&server_packet.encode()).await?;
         println!("sent");
         stream.read_exact(&mut server_response_code).await?;
+    } else if server_packet.command == [3] {
+        stream.write_all(&server_packet.encode()).await?;
+        println!("sent");
+        let mut return_packet_binary = [0; 3112];
+        stream.read_exact(&mut return_packet_binary).await?;
+        let return_packet: FennelServerPacket = Decode::decode(&mut (return_packet_binary.as_slice())).unwrap();
+        let r = submit_identity(identity_db, return_packet).await;
+        if r != [0] {
+            panic!("identity failed to commit.");
+        }
+        stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [1] {
         let r = send_message(message_db, server_packet).await;
         if r != [0] {
