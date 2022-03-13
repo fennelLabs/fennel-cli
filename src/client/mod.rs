@@ -45,7 +45,8 @@ pub async fn handle_connection(
         println!("sent");
         let mut return_packet_binary = [0; 3112];
         stream.read_exact(&mut return_packet_binary).await?;
-        let return_packet: FennelServerPacket = Decode::decode(&mut (return_packet_binary.as_slice())).unwrap();
+        let return_packet: FennelServerPacket =
+            Decode::decode(&mut (return_packet_binary.as_slice())).unwrap();
         let r = submit_identity(identity_db, return_packet).await;
         if r != [0] {
             panic!("identity failed to commit.");
