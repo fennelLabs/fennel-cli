@@ -17,7 +17,7 @@ rocksdb = "0.17.0"
 hex = "0.4.3"
 x25519-dalek = "2.0.0-pre.1"
 codec = { version = "2.3.1", package = "parity-scale-codec", features = ["derive"] }
-fennel-lib = { git = "https://github.com/fennelLabs/fennel-lib", branch = "milestone3/phillywebguy/19-fully-tie-fennel-module-to-database", package = "fennel-lib" }
+fennel-lib = { git = "https://github.com/fennelLabs/fennel-lib", branch = "master", package = "fennel-lib" }
 
 [dev-dependencies]
 once_cell = "1.9.0"

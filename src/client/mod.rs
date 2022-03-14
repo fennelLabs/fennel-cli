@@ -32,7 +32,6 @@ pub async fn handle_connection(
     if !verify_packet_signature(&server_packet) {
         panic!("server packet signature failed to verify");
     }
-    //println!("{}", server_packet.command.to_string());
     if server_packet.command == [0] {
         let r = submit_identity(identity_db, server_packet).await;
         if r != [0] {
