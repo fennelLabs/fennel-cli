@@ -41,6 +41,7 @@ pub async fn handle_connection(
         println!("sent");
         stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [3] {
+        println!("Retrieve Identity...");
         stream.write_all(&server_packet.encode()).await?;
         println!("sent");
         let mut return_packet_binary = [0; 3112];
@@ -90,8 +91,6 @@ pub async fn handle_connection(
         put_messages(message_db, parse_remote_messages(response).await)
             .await
             .expect("failed to commit messages");
-    } else if server_packet.command == [3] {
-        println!("Retrieve Identity");
     } else if server_packet.command == [4] {
         println!("Download Insert Identity");
         //TransactionHandler::fetch_public_keys();
