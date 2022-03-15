@@ -50,7 +50,9 @@ pub async fn handle_connection(
             Decode::decode(&mut (return_packet_binary.as_slice())).unwrap();
         let r = submit_identity(identity_db, return_packet).await;
         if r != [0] {
-            panic!("identity failed to commit.");
+            panic!("Identity failed to be retrieved.");
+        } else {
+            println!("Identity retrieved.");
         }
         stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [1] {
