@@ -2,13 +2,14 @@
 mod tests;
 
 use codec::{Decode, Encode};
+use futures::stream::{self, StreamExt};
 use fennel_lib::{
     aes_decrypt, aes_encrypt, export_keypair_to_file, export_public_key_to_binary,
     generate_keypair, get_session_public_key, get_session_secret, get_shared_secret, hash,
     import_keypair_from_file, import_public_key_from_binary, insert_identity, insert_message,
-    retrieve_identity, retrieve_messages,
+    retrieve_identity, retrieve_messages, 
     rsa_tools::{decrypt, encrypt},
-    sign, verify, AESCipher, FennelServerPacket, Identity, Message, TransactionHandler,
+    sign, verify, AESCipher, FennelServerPacket, Identity, Message, TransactionHandler
 };
 use rocksdb::DB;
 use rsa::RsaPrivateKey;
@@ -95,13 +96,14 @@ pub async fn handle_connection(
             .expect("failed to commit messages");
     } else if server_packet.command == [4] {
         println!("Download Insert Identity");
-        //TransactionHandler::fetch_public_keys();
+        let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
+        txn.fetch_identities();
     } else {
         println!("invalid command code");
     }
 
     if server_response_code == [0] {
-        println!("operation completed successfully");
+        println!("Operation completed successfully: response code [0]");
     } else if server_response_code == [9] {
         println!("packet signature failed to verify");
     } else if server_response_code == [97] {

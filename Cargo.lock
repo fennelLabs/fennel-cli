@@ -731,6 +731,7 @@ dependencies = [
  "bytes",
  "clap",
  "fennel-lib",
+ "futures",
  "hex",
  "once_cell",
  "parity-scale-codec",
