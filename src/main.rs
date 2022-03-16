@@ -198,7 +198,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         Commands::DownloadInsertIdentity {} => {
             println!("Execute DownloadInsertIdentity");
-            download_identities();          
+            download_identities().await;          
         }
     }
 

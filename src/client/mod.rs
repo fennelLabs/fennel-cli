@@ -118,11 +118,11 @@ pub async fn handle_connection(
     Ok(())
 }
 
-pub fn download_identities () -> Result<()> {
-    println!("Download Insert Identity");
-        let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
-        let r = txn.fetch_identities();
-        Ok(())
+pub async fn download_identities () -> Result<()> {
+    println!("Client download_identities");
+    let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
+    let r = txn.fetch_identities().await;
+    Ok(())
 }
 
 /// Given a FennelServerPacket, make sure that the signature applies correctly.
