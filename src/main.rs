@@ -8,7 +8,7 @@ use clap::Parser;
 use client::{
     handle_aes_encrypt, handle_backlog_decrypt, handle_connection, handle_decrypt,
     handle_diffie_hellman_encrypt, handle_diffie_hellman_one, handle_diffie_hellman_two,
-    handle_encrypt, handle_generate_keypair, handle_sign, handle_verify,
+    handle_encrypt, handle_generate_keypair, handle_sign, handle_verify, download_identities
 };
 use command::{Cli, Commands};
 use fennel_lib::{
@@ -198,20 +198,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         Commands::DownloadInsertIdentity {} => {
             println!("Execute DownloadInsertIdentity");
-            TransactionHandler::fetch_public_keys().await?;
-            //Firt, we'll need to make RPC call to fennel-lib's fetch_public_keys
-
-            /*let packet = FennelServerPacket {
-                command: [4; 1],
-                identity: id.to_ne_bytes(),
-                fingerprint,
-                message: [0; 1024],
-                signature: sign(private_key, [0; 1024].to_vec()).try_into().unwrap(),
-                public_key: export_public_key_to_binary(&public_key).unwrap(),
-                recipient: [0; 4],
-            };
-            let listener: TcpStream = TcpStream::connect("127.0.0.1:7878").await?;
-            handle_connection(identity_db, message_db, listener, packet).await?*/
+            download_identities();          
         }
     }
 

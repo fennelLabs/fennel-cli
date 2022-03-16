@@ -118,6 +118,13 @@ pub async fn handle_connection(
     Ok(())
 }
 
+pub fn download_identities () -> Result<()> {
+    println!("Download Insert Identity");
+        let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
+        let r = txn.fetch_identities();
+        Ok(())
+}
+
 /// Given a FennelServerPacket, make sure that the signature applies correctly.
 fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
     let pub_key =
