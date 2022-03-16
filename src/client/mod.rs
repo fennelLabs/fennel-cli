@@ -121,7 +121,7 @@ pub async fn handle_connection(
 pub async fn download_identities () -> Result<()> {
     println!("Client download_identities");
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
-    let r = txn.fetch_identities().await;
+    //let r = futures::executor::block_ontxn.fetch_identities().await;
     Ok(())
 }
 
