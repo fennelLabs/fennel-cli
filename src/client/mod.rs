@@ -117,7 +117,7 @@ pub async fn handle_connection(
 pub async fn retrieve_identities () -> Result<()> {
     println!("Client retrieve_identities");
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
-    let r = txn.fetch_identities().await.expect("connection failed");
+    //let r = txn.fetch_identities().await.expect("connection failed");
     Ok(())
 }
 
