@@ -8,7 +8,7 @@ use clap::Parser;
 use client::{
     handle_aes_encrypt, handle_backlog_decrypt, handle_connection, handle_decrypt,
     handle_diffie_hellman_encrypt, handle_diffie_hellman_one, handle_diffie_hellman_two,
-    handle_encrypt, handle_generate_keypair, handle_sign, handle_verify, download_identities
+    handle_encrypt, handle_generate_keypair, handle_sign, handle_verify, retrieve_identities
 };
 use command::{Cli, Commands};
 use fennel_lib::{
@@ -196,9 +196,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let listener: TcpStream = TcpStream::connect("127.0.0.1:7878").await?;
             handle_connection(identity_db, message_db, listener, packet).await?
         }
-        Commands::DownloadInsertIdentity {} => {
-            println!("Execute DownloadInsertIdentity");
-            download_identities().await;          
+        Commands::RetrieveIdentities {} => {
+            println!("Execute RetrieveIdentities");
+            retrieve_identities().await;         
         }
     }
 
