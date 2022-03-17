@@ -94,11 +94,6 @@ pub async fn handle_connection(
         put_messages(message_db, parse_remote_messages(response).await)
             .await
             .expect("failed to commit messages");
-    } else if server_packet.command == [4] {
-        println!("Download Insert Identity");
-        //let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
-        //println!("fetch_identities");
-        //txn.fetch_identities();
     } else {
         println!("invalid command code");
     }
@@ -122,7 +117,7 @@ pub async fn handle_connection(
 pub async fn retrieve_identities () -> Result<()> {
     println!("Client retrieve_identities");
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
-    let r = txn.fetch_identities().await;
+    let r = txn.fetch_identities().await.expect("connection failed");
     Ok(())
 }
 
