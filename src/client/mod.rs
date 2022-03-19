@@ -133,7 +133,7 @@ fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
     verify(pub_key, packet.message.to_vec(), packet.signature.to_vec())
 }
 
-fn submit_identity_fennel( {
+fn submit_identity_fennel() {
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
     println!("fetch_identities()");
     let r = txn.create_identity(&mut self);
