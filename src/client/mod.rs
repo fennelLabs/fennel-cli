@@ -133,7 +133,7 @@ fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
 }
 
 fn submit_identity_fennel() {
-    Ok(())
+    ()
 }
 
 /// Provides a standardized access for adding identities to the database.

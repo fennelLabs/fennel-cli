@@ -747,7 +747,7 @@ dependencies = [
 [[package]]
 name = "fennel-lib"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/fennel-lib?branch=master#0d6e4d4d21e0b50b0b70cd676d9f91e474af35d6"
+source = "git+https://github.com/fennelLabs/fennel-lib?branch=milestone3/phillywebguy/19-fully-tie-fennel-module-to-database#d4022ffd1572c9a4672eaffad340cfe8f2e0beb5"
 dependencies = [
  "base64",
  "bincode",

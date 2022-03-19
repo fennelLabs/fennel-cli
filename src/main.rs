@@ -13,7 +13,7 @@ use client::{
 use command::{Cli, Commands};
 use fennel_lib::{
     export_public_key_to_binary, get_identity_database_handle, get_message_database_handle,
-    insert_identity, retrieve_identity, sign, FennelServerPacket, Identity, TransactionHandler,
+    insert_identity, retrieve_identity, sign, FennelServerPacket, Identity,
 };
 use tokio::{net::TcpStream};
 
