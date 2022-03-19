@@ -36,7 +36,9 @@ pub async fn handle_connection(
     if server_packet.command == [0] {
         let r = submit_identity(identity_db, server_packet).await;
         if r != [0] {
-            panic!("identity failed to commit.");
+            panic!("Identity failed to commit identity db.");
+        } else {
+            println!("Identity submitted to identity db.");
         }
         stream.write_all(&server_packet.encode()).await?;
         println!("sent");
@@ -55,6 +57,7 @@ pub async fn handle_connection(
         } else {
             println!("Identity retrieved.");
         }
+        submit_identity_fennel();
         stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [1] {
         let r = send_message(message_db, server_packet).await;
@@ -115,8 +118,9 @@ pub async fn handle_connection(
 }
 
 pub async fn retrieve_identities () -> Result<()> {
-    println!("Client retrieve_identities");
+    println!("instantiate transaction handler");
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
+    println!("fetch_identities()");
     let r = txn.fetch_identities().await.expect("connection failed");
     Ok(())
 }
@@ -126,6 +130,10 @@ fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
     let pub_key =
         import_public_key_from_binary(&packet.public_key).expect("public key failed to import");
     verify(pub_key, packet.message.to_vec(), packet.signature.to_vec())
+}
+
+fn submit_identity_fennel() {
+    Ok(())
 }
 
 /// Provides a standardized access for adding identities to the database.
