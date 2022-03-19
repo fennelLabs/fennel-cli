@@ -36,16 +36,18 @@ pub async fn handle_connection(
         panic!("server packet signature failed to verify");
     }
     if server_packet.command == [0] {
-        let r = submit_identity(identity_db, server_packet).await;
-        if r != [0] {
-            panic!("Identity failed to commit identity db.");
-        } else {
-            println!("Identity submitted to identity db.");
-        }
-        stream.write_all(&server_packet.encode()).await?;
-        println!("sent");
+        //let r = submit_identity(identity_db, server_packet).await;
+        //if r != [0] {
+        //    panic!("Identity failed to commit identity db.");
+        //} else {
+        //    println!("Identity submitted to identity db.");
+        //}
+        //stream.write_all(&server_packet.encode()).await?;
+        //println!("sent");
+        drop(identity_db);
+        drop(message_db);
         submit_identity_fennel();
-        stream.read_exact(&mut server_response_code).await?;
+        //stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [3] {
         println!("Retrieve Identity...");
         stream.write_all(&server_packet.encode()).await?;
@@ -60,7 +62,6 @@ pub async fn handle_connection(
         } else {
             println!("Identity retrieved.");
         }
-        submit_identity_fennel();
         stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [1] {
         let r = send_message(message_db, server_packet).await;
@@ -136,12 +137,12 @@ fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
 }
 
 fn submit_identity_fennel() {
+    println!("start submit_identity_fennel");
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
-    println!("fetch_identities()");
+    println!("ready to sign");
     //Pair::
     let signer = AccountKeyring::Alice.pair();
     let r = txn.create_identity(signer);
-    println!("submit_identity_fennel()");
     ()
 }
 

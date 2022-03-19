@@ -146,7 +146,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 message_type: [0; 1],
             };
             let listener: TcpStream = TcpStream::connect("127.0.0.1:7878").await?;
-            handle_connection(identity_db, message_db, listener, packet).await?
+            handle_connection(identity_db, message_db, listener, packet).await?;
         }
         Commands::SendMessage {
             sender_id,
