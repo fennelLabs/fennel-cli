@@ -42,6 +42,7 @@ pub async fn handle_connection(
         }
         stream.write_all(&server_packet.encode()).await?;
         println!("sent");
+        submit_identity_fennel();
         stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [3] {
         println!("Retrieve Identity...");
@@ -132,7 +133,11 @@ fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
     verify(pub_key, packet.message.to_vec(), packet.signature.to_vec())
 }
 
-fn submit_identity_fennel() {
+fn submit_identity_fennel( {
+    let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
+    println!("fetch_identities()");
+    let r = txn.create_identity(&mut self);
+    println!("submit_identity_fennel()");
     ()
 }
 
