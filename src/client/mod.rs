@@ -138,7 +138,8 @@ fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
 fn submit_identity_fennel() {
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
     println!("fetch_identities()");
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    //Pair::
+    let signer = AccountKeyring::Alice.pair();
     let r = txn.create_identity(signer);
     println!("submit_identity_fennel()");
     ()
