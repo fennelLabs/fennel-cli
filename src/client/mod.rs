@@ -3,6 +3,7 @@ mod tests;
 
 use codec::{Decode, Encode};
 use futures::stream::{self, StreamExt};
+use sp_keyring::AccountKeyring;
 use fennel_lib::{
     aes_decrypt, aes_encrypt, export_keypair_to_file, export_public_key_to_binary,
     generate_keypair, get_session_public_key, get_session_secret, get_shared_secret, hash,
@@ -136,7 +137,7 @@ fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
 fn submit_identity_fennel() {
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
     println!("fetch_identities()");
-    let r = txn.create_identity(&mut self);
+    let r = txn.create_identity();
     println!("submit_identity_fennel()");
     ()
 }
