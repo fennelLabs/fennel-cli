@@ -12,6 +12,7 @@ use fennel_lib::{
     rsa_tools::{decrypt, encrypt},
     sign, verify, AESCipher, FennelServerPacket, Identity, Message, TransactionHandler
 };
+use subxt::{sp_core::sr25519::Pair, ClientBuilder, DefaultConfig, DefaultExtra, PairSigner};
 use rocksdb::DB;
 use rsa::RsaPrivateKey;
 use std::panic;
@@ -137,7 +138,8 @@ fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
 fn submit_identity_fennel() {
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
     println!("fetch_identities()");
-    let r = txn.create_identity();
+    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let r = txn.create_identity(signer);
     println!("submit_identity_fennel()");
     ()
 }

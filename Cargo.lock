@@ -741,6 +741,7 @@ dependencies = [
  "sha3",
  "slice-of-array",
  "sp-keyring",
+ "subxt",
  "tokio",
  "x25519-dalek",
 ]
