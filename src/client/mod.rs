@@ -47,7 +47,7 @@ pub async fn handle_connection(
         drop(identity_db);
         drop(message_db);
         println!("server_packet.command == [0]");
-        submit_identity_fennel();
+        submit_identity_fennel().await;
         //stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [3] {
         println!("Retrieve Identity...");
@@ -137,16 +137,16 @@ fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
     verify(pub_key, packet.message.to_vec(), packet.signature.to_vec())
 }
 
-fn submit_identity_fennel() {
+async fn submit_identity_fennel() {
     println!("start submit_identity_fennel");
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
     println!("ready to sign");
     //Pair::
     let signer = AccountKeyring::Alice.pair();
     println!("now get ready to create identity");
-    let r = txn.create_identity(signer);
+    let r = txn.create_identity(signer).await;
     println!("txn.create_identity has run");
-    ()
+    r.unwrap()
 }
 
 /// Provides a standardized access for adding identities to the database.
