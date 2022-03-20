@@ -2,25 +2,25 @@
 mod tests;
 
 use codec::{Decode, Encode};
-use futures::stream::{self, StreamExt};
-use sp_keyring::AccountKeyring;
 use fennel_lib::{
     aes_decrypt, aes_encrypt, export_keypair_to_file, export_public_key_to_binary,
     generate_keypair, get_session_public_key, get_session_secret, get_shared_secret, hash,
     import_keypair_from_file, import_public_key_from_binary, insert_identity, insert_message,
-    retrieve_identity, retrieve_messages, 
+    retrieve_identity, retrieve_messages,
     rsa_tools::{decrypt, encrypt},
-    sign, verify, AESCipher, FennelServerPacket, Identity, Message, TransactionHandler
+    sign, verify, AESCipher, FennelServerPacket, Identity, Message, TransactionHandler,
 };
-use subxt::{sp_core::sr25519::Pair, ClientBuilder, DefaultConfig, DefaultExtra, PairSigner};
+use futures::stream::{self, StreamExt};
 use rocksdb::DB;
 use rsa::RsaPrivateKey;
+use sp_keyring::AccountKeyring;
 use std::panic;
 use std::str;
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
 };
+use subxt::{sp_core::sr25519::Pair, ClientBuilder, DefaultConfig, DefaultExtra, PairSigner};
 use tokio::{io::*, net::TcpStream};
 use x25519_dalek::{PublicKey, SharedSecret, StaticSecret};
 
@@ -122,7 +122,7 @@ pub async fn handle_connection(
     Ok(())
 }
 
-pub async fn retrieve_identities () -> Result<()> {
+pub async fn retrieve_identities() -> Result<()> {
     println!("instantiate transaction handler");
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
     println!("fetch_identities()");

@@ -8,7 +8,7 @@ use clap::Parser;
 use client::{
     handle_aes_encrypt, handle_backlog_decrypt, handle_connection, handle_decrypt,
     handle_diffie_hellman_encrypt, handle_diffie_hellman_one, handle_diffie_hellman_two,
-    handle_encrypt, handle_generate_keypair, handle_sign, handle_verify, retrieve_identities
+    handle_encrypt, handle_generate_keypair, handle_sign, handle_verify, retrieve_identities,
 };
 use command::{Cli, Commands};
 use fennel_lib::{
@@ -200,7 +200,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             println!("Execute RetrieveIdentities");
             drop(identity_db);
             drop(message_db);
-            retrieve_identities().await;         
+            retrieve_identities().await;
         }
     }
 
