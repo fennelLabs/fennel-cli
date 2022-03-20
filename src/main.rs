@@ -15,7 +15,7 @@ use fennel_lib::{
     export_public_key_to_binary, get_identity_database_handle, get_message_database_handle,
     insert_identity, retrieve_identity, sign, FennelServerPacket, Identity,
 };
-use tokio::{net::TcpStream};
+use tokio::net::TcpStream;
 
 use crate::client::{handle_aes_decrypt, prep_cipher};
 
@@ -146,7 +146,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 message_type: [0; 1],
             };
             let listener: TcpStream = TcpStream::connect("127.0.0.1:7878").await?;
-            handle_connection(identity_db, message_db, listener, packet).await?;
+            handle_connection(identity_db, message_db, listener, packet).await?
         }
         Commands::SendMessage {
             sender_id,
