@@ -46,7 +46,7 @@ pub async fn handle_connection(
         //println!("sent");
         drop(identity_db);
         drop(message_db);
-        println!("start submit_identity_fennel()");
+        println!("server_packet.command == [0]");
         submit_identity_fennel();
         //stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [3] {
