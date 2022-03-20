@@ -144,7 +144,7 @@ fn submit_identity_fennel() {
     //Pair::
     let signer = AccountKeyring::Alice.pair();
     println!("now get ready to create identity");
-    //let r = txn.create_identity(signer);
+    let r = txn.create_identity(signer);
     ()
 }
 
