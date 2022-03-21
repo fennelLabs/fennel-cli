@@ -439,9 +439,9 @@ checksum = "5827cebf4670468b8772dd191856768aedcb1b0278a04f989f7766351917b9dc"
 
 [[package]]
 name = "cpufeatures"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95059428f66df56b63431fdb4e1947ed2190586af5c5a8a8b71122bdf5a7f469"
+checksum = "59a6001667ab124aebae2a495118e11d30984c3a653e99d86d58971708cf5e4b"
 dependencies = [
  "libc",
 ]
@@ -665,15 +665,15 @@ dependencies = [
 
 [[package]]
 name = "dyn-clone"
-version = "1.0.4"
+version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee2626afccd7561a06cf1367e2950c4718ea04565e20fb5029b6c7d8ad09abcf"
+checksum = "21e50f3adc76d6a43f5ed73b698a87d0760ca74617f60f7c3b879003536fdd28"
 
 [[package]]
 name = "ed25519"
-version = "1.4.0"
+version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eed12bbf7b5312f8da1c2722bc06d8c6b12c2d86a7fb35a194c7f3e6fc2bbe39"
+checksum = "3d5c4b5e5959dc2c2b89918d8e2cc40fcdd623cef026ed09d2f0ee05199dc8e4"
 dependencies = [
  "signature",
 ]
@@ -749,7 +749,7 @@ dependencies = [
 [[package]]
 name = "fennel-lib"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/fennel-lib?branch=milestone3/phillywebguy/19-fully-tie-fennel-module-to-database#d4022ffd1572c9a4672eaffad340cfe8f2e0beb5"
+source = "git+https://github.com/fennelLabs/fennel-lib?branch=milestone3/phillywebguy/19-fully-tie-fennel-module-to-database#612fd7585c2359d0bad9073c44efecbff4e66b89"
 dependencies = [
  "base64",
  "bincode",
@@ -766,6 +766,7 @@ dependencies = [
  "rsa",
  "sha3",
  "slice-of-array",
+ "sp-keyring",
  "subxt",
  "thiserror",
  "tokio",
@@ -1070,7 +1071,7 @@ checksum = "31f4c6746584866f0feabcc69893c5b51beef3831656a968ed7ae254cdc4fd03"
 dependencies = [
  "bytes",
  "fnv",
- "itoa",
+ "itoa 1.0.1",
 ]
 
 [[package]]
@@ -1116,7 +1117,7 @@ dependencies = [
  "http-body",
  "httparse",
  "httpdate",
- "itoa",
+ "itoa 1.0.1",
  "pin-project-lite",
  "tokio",
  "tower-service",
@@ -1186,6 +1187,12 @@ checksum = "276ec31bcb4a9ee45f58bec6f9ec700ae4cf4f4f8f2fa7e06cb406bd5ffdd770"
 dependencies = [
  "num-traits",
 ]
+
+[[package]]
+name = "itoa"
+version = "0.4.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b71991ff56294aa922b450139ee08b3bfc70982c6b2c7562771375cf73542dd4"
 
 [[package]]
 name = "itoa"
@@ -1302,9 +1309,9 @@ checksum = "830d08ce1d1d941e6b30645f1a0eb5643013d835ce3779a5fc208261dbe10f55"
 
 [[package]]
 name = "libc"
-version = "0.2.119"
+version = "0.2.121"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1bf2e165bb3457c8e098ea76f3e3bc9db55f87aa90d52d0e6be741470916aaa4"
+checksum = "efaa7b300f3b5fe8eb6bf21ce3895e1751d9665086af2d64b42f19701015ff4f"
 
 [[package]]
 name = "libloading"
@@ -1473,14 +1480,15 @@ dependencies = [
 
 [[package]]
 name = "mio"
-version = "0.8.0"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba272f85fa0b41fc91872be579b3bbe0f56b792aa361a380eb669469f68dafb2"
+checksum = "52da4364ffb0e4fe33a9841a98a3f3014fb964045ce4f7a45a398243c8d6b0c9"
 dependencies = [
  "libc",
  "log",
  "miow",
  "ntapi",
+ "wasi 0.11.0+wasi-snapshot-preview1",
  "winapi",
 ]
 
@@ -1501,13 +1509,12 @@ checksum = "72ef4a56884ca558e5ddb05a1d1e7e1bfd9a68d9ed024c21704cc98872dae1bb"
 
 [[package]]
 name = "nom"
-version = "7.1.0"
+version = "7.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b1d11e1ef389c76fe5b81bcaf2ea32cf88b62bc494e19f493d0b30e7a930109"
+checksum = "a8903e5a29a317527874d0402f867152a3d21c908bb0b933e416c65e301d4c36"
 dependencies = [
  "memchr",
  "minimal-lexical",
- "version_check",
 ]
 
 [[package]]
@@ -1546,6 +1553,16 @@ dependencies = [
  "rand 0.8.5",
  "smallvec",
  "zeroize",
+]
+
+[[package]]
+name = "num-format"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bafe4179722c2894288ee77a9f044f02811c86af699344c498b0840c698a2465"
+dependencies = [
+ "arrayvec 0.4.12",
+ "itoa 0.4.8",
 ]
 
 [[package]]
@@ -1959,9 +1976,9 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.15"
+version = "1.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "864d3e96a899863136fc6e99f3d7cae289dafe43bf2c5ac19b70df7210c0a145"
+checksum = "b4af2ec4714533fcdf07e886f17025ace8b997b9ce51204ee69b6da831c3da57"
 dependencies = [
  "proc-macro2",
 ]
@@ -2084,9 +2101,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.5.4"
+version = "1.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d07a8629359eb56f1e2fb1652bb04212c072a87ba68546a04065d525673ac461"
+checksum = "1a11647b6b25ff05a515cb92c365cec08801e83423a235b51e231e1808747286"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2359,7 +2376,7 @@ version = "1.0.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8e8d9fa5c3b304765ce1fd9c4c8a3de2c8db365a5b91be52f186efc675681d95"
 dependencies = [
- "itoa",
+ "itoa 1.0.1",
  "ryu",
  "serde",
 ]
@@ -3087,11 +3104,12 @@ dependencies = [
 
 [[package]]
 name = "ss58-registry"
-version = "1.15.0"
+version = "1.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f9799e6d412271cb2414597581128b03f3285f260ea49f5363d07df6a332b3e"
+checksum = "7b84a70894df7a73666e0694f44b41a9571625e9546fb58a0818a565d2c7e084"
 dependencies = [
  "Inflector",
+ "num-format",
  "proc-macro2",
  "quote",
  "serde",
@@ -3220,9 +3238,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "1.0.86"
+version = "1.0.89"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a65b3f4ffa0092e9887669db0eae07941f023991ab58ea44da8fe8e2d511c6b"
+checksum = "ea297be220d52398dcc07ce15a209fce436d361735ac1db700cab3b6cdfb9f54"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3367,9 +3385,9 @@ dependencies = [
 
 [[package]]
 name = "tokio-rustls"
-version = "0.23.2"
+version = "0.23.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a27d5f2b839802bd8267fa19b0530f5a08b9c08cd417976be2a65d130fe1c11b"
+checksum = "4151fda0cf2798550ad0b34bcfc9b9dcc2a9d2471c895c68f3a8818e54f2389e"
 dependencies = [
  "rustls",
  "tokio",
@@ -3627,6 +3645,12 @@ name = "wasi"
 version = "0.10.2+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd6fbd9a79829dd1ad0cc20627bf1ed606756a7f77edff7b66b7064f9cb327c6"
+
+[[package]]
+name = "wasi"
+version = "0.11.0+wasi-snapshot-preview1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
 name = "wasm-bindgen"
