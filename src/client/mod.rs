@@ -29,7 +29,7 @@ pub async fn handle_connection(
     identity_db: Arc<Mutex<DB>>,
     message_db: Arc<Mutex<DB>>,
     mut stream: TcpStream,
-    server_packet: FennelServerPacket,
+    mut server_packet: FennelServerPacket,
 ) -> Result<()> {
     let mut server_response_code = [99; 1];
     if !verify_packet_signature(&server_packet) {
@@ -44,11 +44,19 @@ pub async fn handle_connection(
         //}
         //stream.write_all(&server_packet.encode()).await?;
         //println!("sent");
-        drop(identity_db);
-        drop(message_db);
+        //drop(identity_db);
+        //drop(message_db);
         println!("server_packet.command == [0]");
-        submit_identity_fennel().await;
-        //stream.read_exact(&mut server_response_code).await?;
+        let r = submit_identity_fennel().await;
+        let x: [u8; 4] = r.to_ne_bytes();
+        server_packet.identity = x;
+        let dbwrite = submit_identity(identity_db, server_packet).await;
+        if dbwrite != [0] {
+            panic!("Identity failed to commit identity db.");
+        } else {
+            println!("Identity submitted to identity db.");
+        }
+        stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [3] {
         println!("Retrieve Identity...");
         stream.write_all(&server_packet.encode()).await?;
@@ -137,7 +145,7 @@ fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
     verify(pub_key, packet.message.to_vec(), packet.signature.to_vec())
 }
 
-async fn submit_identity_fennel() {
+async fn submit_identity_fennel() -> u32 {
     println!("start submit_identity_fennel");
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
     println!("ready to sign");
