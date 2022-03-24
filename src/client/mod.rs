@@ -55,7 +55,7 @@ pub async fn handle_connection(
         //} else {
         //    println!("Identity submitted to identity db.");
         //}
-        println!("{0}", r);
+        println!("ID: {0}", r);
         stream.write_all(&server_packet.encode()).await?;
         stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [3] {
@@ -128,7 +128,7 @@ pub async fn handle_connection(
         panic!("server operation failed");
     }
 
-    println!("Operations complete");
+    println!("Operations complete.");
     Ok(())
 }
 
