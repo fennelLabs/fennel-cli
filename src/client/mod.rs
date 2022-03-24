@@ -46,7 +46,6 @@ pub async fn handle_connection(
         //println!("sent");
         //drop(identity_db);
         //drop(message_db);
-        println!("server_packet.command == [0]");
         let r = submit_identity_fennel().await;
         let x: [u8; 4] = r.to_ne_bytes();
         server_packet.identity = x;
@@ -56,6 +55,7 @@ pub async fn handle_connection(
         //} else {
         //    println!("Identity submitted to identity db.");
         //}
+        println!("{0}", r);
         stream.write_all(&server_packet.encode()).await?;
         stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [3] {
