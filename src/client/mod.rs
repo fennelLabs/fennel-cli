@@ -36,26 +36,11 @@ pub async fn handle_connection(
         panic!("server packet signature failed to verify");
     }
     if server_packet.command == [0] {
-        //let r = submit_identity(identity_db, server_packet).await;
-        //if r != [0] {
-        //    panic!("Identity failed to commit identity db.");
-        //} else {
-        //    println!("Identity submitted to identity db.");
-        //}
-        //stream.write_all(&server_packet.encode()).await?;
-        //println!("sent");
-        //drop(identity_db);
-        //drop(message_db);
         let r = submit_identity_fennel().await;
-        let x: [u8; 4] = r.to_ne_bytes();
-        server_packet.identity = x;
-        //let dbwrite = submit_identity(identity_db, server_packet).await;
-        //if dbwrite != [0] {
-        //    panic!("Identity failed to commit identity db.");
-        //} else {
-        //    println!("Identity submitted to identity db.");
-        //}
-        println!("ID: {0}", r);
+        if(r.length()){
+            let id: [u8; 4] = r[0].to_ne_bytes();
+        }
+        server_packet.identity = id;
         stream.write_all(&server_packet.encode()).await?;
         stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [3] {
@@ -133,9 +118,7 @@ pub async fn handle_connection(
 }
 
 pub async fn retrieve_identities() -> Result<()> {
-    println!("instantiate transaction handler");
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
-    println!("fetch_identities()");
     let r = txn.fetch_identities().await.expect("connection failed");
     Ok(())
 }
