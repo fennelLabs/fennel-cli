@@ -37,12 +37,12 @@ pub async fn handle_connection(
     }
     if server_packet.command == [0] {
         let r = submit_identity_fennel().await;
-        if(r.length()){
+        if r.len() > 0 {
             let id: [u8; 4] = r[0].to_ne_bytes();
+            server_packet.identity = id;
+            stream.write_all(&server_packet.encode()).await?;
+            stream.read_exact(&mut server_response_code).await?;
         }
-        server_packet.identity = id;
-        stream.write_all(&server_packet.encode()).await?;
-        stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [3] {
         println!("Retrieve Identity...");
         stream.write_all(&server_packet.encode()).await?;
@@ -130,7 +130,7 @@ fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
     verify(pub_key, packet.message.to_vec(), packet.signature.to_vec())
 }
 
-async fn submit_identity_fennel() -> u32 {
+async fn submit_identity_fennel() -> Vec<u32> {
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
     let signer = AccountKeyring::Alice.pair();
     let r = txn.create_identity(signer).await;
