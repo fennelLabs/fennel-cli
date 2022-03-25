@@ -38,6 +38,7 @@ pub async fn handle_connection(
     if server_packet.command == [0] {
         let r = submit_identity_fennel().await;
         if r.len() > 0 {
+            println!("let's go");
             let id: [u8; 4] = r[0].to_ne_bytes();
             server_packet.identity = id;
             stream.write_all(&server_packet.encode()).await?;
