@@ -43,6 +43,8 @@ pub async fn handle_connection(
             server_packet.identity = id;
             stream.write_all(&server_packet.encode()).await?;
             stream.read_exact(&mut server_response_code).await?;
+        } else {
+            println!("not found");
         }
     } else if server_packet.command == [3] {
         println!("Retrieve Identity...");
@@ -120,7 +122,7 @@ pub async fn handle_connection(
 
 pub async fn retrieve_identities() -> Result<()> {
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
-    let r = txn.fetch_identities().await.expect("connection failed");
+    txn.fetch_identities().await.expect("connection failed");
     Ok(())
 }
 
