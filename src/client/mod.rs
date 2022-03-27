@@ -42,9 +42,9 @@ pub async fn handle_connection(
             server_packet.identity = id;
             stream.write_all(&server_packet.encode()).await?;
             stream.read_exact(&mut server_response_code).await?;
-            println!("Identity inserted."); 
+            println!("Identity inserted.");
         } else {
-            println!("No identity inserted.");   
+            println!("No identity inserted.");
         }
     } else if server_packet.command == [3] {
         println!("Retrieve Identity...");
