@@ -30,8 +30,7 @@ jobs:
         run: |
           curl https://sh.rustup.rs -sSf | sh -s -- -y
           source ~/.cargo/env
-          rustup default nightly
-          rustup update nightly
+          rustup default stable
           rustup update stable
       
       - name: Check Formatting
