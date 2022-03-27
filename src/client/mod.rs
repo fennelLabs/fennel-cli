@@ -62,6 +62,7 @@ pub async fn handle_connection(
         }
         stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [1] {
+        // Send Message
         let r = send_message(message_db, server_packet).await;
         if r != [0] {
             panic!("message failed to commit.");
@@ -70,6 +71,7 @@ pub async fn handle_connection(
         println!("sent");
         stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [2] {
+        // Receive all new messages
         stream.write_all(&server_packet.encode()).await?;
         println!("sent");
         let mut response: Vec<[u8; 3111]> = Vec::new();
