@@ -1,5 +1,3 @@
-#![feature(test)]
-
 mod client;
 mod command;
 use std::{error::Error, sync::Arc};
