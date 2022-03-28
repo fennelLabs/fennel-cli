@@ -9,5 +9,4 @@ RUN DEBIAN_FRONTEND=noninteractive \
     apt-get install clang libclang-dev libclang1 llvm llvm-dev clang-tools -y && \
     apt-get upgrade -y
 
-RUN rustup default nightly && \
-    rustup target add wasm32-unknown-unknown --toolchain nightly
+RUN rustup default stable
