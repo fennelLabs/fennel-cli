@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 mod client;
 mod command;
 use std::{error::Error, sync::Arc};
@@ -198,7 +200,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             println!("Execute RetrieveIdentities");
             drop(identity_db);
             drop(message_db);
-            retrieve_identities().await;
+            retrieve_identities().await.unwrap();
         }
     }
 
