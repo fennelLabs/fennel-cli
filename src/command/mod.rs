@@ -69,4 +69,6 @@ pub enum Commands {
     CreateIdentity { id: u32 },
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     RetrieveIdentity { id: u32 },
+    #[clap()]
+    RetrieveIdentities {},
 }

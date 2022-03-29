@@ -1,8 +1,7 @@
 # fennel-cli
-```
-virtualenv -p python3 venv
-
-source venv/bin/activate
-
-pip install -r requirements.txt
+To set up the CLI and find information on how to use the CLI, run
+```bash
+$ ./scripts/setup.sh
+$ cargo run
+$ target/debug/fennel-cli help
 ```

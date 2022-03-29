@@ -8,16 +8,19 @@ use fennel_lib::{
     import_keypair_from_file, import_public_key_from_binary, insert_identity, insert_message,
     retrieve_identity, retrieve_messages,
     rsa_tools::{decrypt, encrypt},
-    sign, verify, AESCipher, FennelServerPacket, Identity, Message,
+    sign, verify, AESCipher, FennelServerPacket, Identity, Message, TransactionHandler,
 };
+use futures::stream::{self, StreamExt};
 use rocksdb::DB;
 use rsa::RsaPrivateKey;
+use sp_keyring::AccountKeyring;
 use std::panic;
 use std::str;
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
 };
+use subxt::{sp_core::sr25519::Pair, ClientBuilder, DefaultConfig, DefaultExtra, PairSigner};
 use tokio::{io::*, net::TcpStream};
 use x25519_dalek::{PublicKey, SharedSecret, StaticSecret};
 
@@ -26,23 +29,25 @@ pub async fn handle_connection(
     identity_db: Arc<Mutex<DB>>,
     message_db: Arc<Mutex<DB>>,
     mut stream: TcpStream,
-    server_packet: FennelServerPacket,
+    mut server_packet: FennelServerPacket,
 ) -> Result<()> {
     let mut server_response_code = [99; 1];
     if !verify_packet_signature(&server_packet) {
         panic!("server packet signature failed to verify");
     }
     if server_packet.command == [0] {
-        // Submit Identity
-        let r = submit_identity(identity_db, server_packet).await;
-        if r != [0] {
-            panic!("identity failed to commit.");
+        let r = submit_identity_fennel().await;
+        if r.len() > 0 {
+            let id: [u8; 4] = r[0].to_ne_bytes();
+            server_packet.identity = id;
+            stream.write_all(&server_packet.encode()).await?;
+            stream.read_exact(&mut server_response_code).await?;
+            println!("Identity inserted.");
+        } else {
+            println!("No identity inserted.");
         }
-        stream.write_all(&server_packet.encode()).await?;
-        println!("sent");
-        stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [3] {
-        // Retrieve Identity
+        println!("Retrieve Identity...");
         stream.write_all(&server_packet.encode()).await?;
         println!("sent");
         let mut return_packet_binary = [0; 3112];
@@ -51,7 +56,9 @@ pub async fn handle_connection(
             Decode::decode(&mut (return_packet_binary.as_slice())).unwrap();
         let r = submit_identity(identity_db, return_packet).await;
         if r != [0] {
-            panic!("identity failed to commit.");
+            panic!("Identity failed to be retrieved.");
+        } else {
+            println!("Identity retrieved.");
         }
         stream.read_exact(&mut server_response_code).await?;
     } else if server_packet.command == [1] {
@@ -99,7 +106,7 @@ pub async fn handle_connection(
     }
 
     if server_response_code == [0] {
-        println!("operation completed successfully");
+        println!("Operation completed successfully: response code [0]");
     } else if server_response_code == [9] {
         println!("packet signature failed to verify");
     } else if server_response_code == [97] {
@@ -111,6 +118,13 @@ pub async fn handle_connection(
         panic!("server operation failed");
     }
 
+    println!("All operations complete.");
+    Ok(())
+}
+
+pub async fn retrieve_identities() -> Result<()> {
+    let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
+    txn.fetch_identities().await.expect("connection failed");
     Ok(())
 }
 
@@ -119,6 +133,13 @@ fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
     let pub_key =
         import_public_key_from_binary(&packet.public_key).expect("public key failed to import");
     verify(pub_key, packet.message.to_vec(), packet.signature.to_vec())
+}
+
+async fn submit_identity_fennel() -> Vec<u32> {
+    let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
+    let signer = AccountKeyring::Alice.pair();
+    let r = txn.create_identity(signer).await;
+    r.unwrap()
 }
 
 /// Provides a standardized access for adding identities to the database.
