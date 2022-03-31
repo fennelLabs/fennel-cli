@@ -10,7 +10,6 @@ use fennel_lib::{
     rsa_tools::{decrypt, encrypt},
     sign, verify, AESCipher, FennelServerPacket, Identity, Message, TransactionHandler,
 };
-use futures::stream::{self, StreamExt};
 use rocksdb::DB;
 use rsa::RsaPrivateKey;
 use sp_keyring::AccountKeyring;
@@ -20,7 +19,6 @@ use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
 };
-use subxt::{sp_core::sr25519::Pair, ClientBuilder, DefaultConfig, DefaultExtra, PairSigner};
 use tokio::{io::*, net::TcpStream};
 use x25519_dalek::{PublicKey, SharedSecret, StaticSecret};
 
