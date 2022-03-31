@@ -10,3 +10,5 @@ RUN DEBIAN_FRONTEND=noninteractive \
     apt-get upgrade -y
 
 RUN rustup default stable
+
+COPY . /app/fennel-cli
