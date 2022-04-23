@@ -134,7 +134,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             private_key,
         ),
 
-        Commands::CreateIdentity { } => {
+        Commands::CreateIdentity {} => {
             let packet = FennelServerPacket {
                 command: [0; 1],
                 identity: [0; 4],
