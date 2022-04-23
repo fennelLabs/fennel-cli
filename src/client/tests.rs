@@ -114,7 +114,7 @@ fn test_handle_backlog_decrypt() {
     assert_eq!(identity.fingerprint, received_identity.fingerprint);
 
     let messages = retrieve_messages(message_db_2, identity);
-    let encoded_ciphertext: [u8; 1024] = ciphertext.try_into().unwrap();
+    let encoded_ciphertext: [u8; 512] = ciphertext.try_into().unwrap();
     assert!(verify(
         public_key_loaded,
         messages[0].message.to_vec(),
@@ -219,7 +219,7 @@ fn test_handle_backlog_decrypt_with_dh() {
     assert_eq!(identity.fingerprint, received_identity.fingerprint);
 
     let messages = retrieve_messages(message_db_2, identity);
-    let encoded_ciphertext: [u8; 1024] = ciphertext.try_into().unwrap();
+    let encoded_ciphertext: [u8; 512] = ciphertext.try_into().unwrap();
     assert!(verify(
         public_key_loaded,
         messages[0].message.to_vec(),
@@ -246,7 +246,7 @@ fn test_handle_backlog_decrypt_with_dh() {
 fn test_pack_message() {
     let test = vec![1, 2, 3, 4, 5];
     let packed_test = pack_message(test);
-    assert_eq!(packed_test.len(), 1024);
+    assert_eq!(packed_test.len(), 512);
     assert_eq!(packed_test[0], 5);
 }
 

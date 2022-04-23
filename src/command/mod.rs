@@ -65,8 +65,8 @@ pub enum Commands {
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     GetMessages { id: u32 },
 
-    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    CreateIdentity { id: u32 },
+    #[clap()]
+    CreateIdentity {},
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     RetrieveIdentity { id: u32 },
     #[clap()]

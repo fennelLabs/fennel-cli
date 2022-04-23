@@ -758,7 +758,7 @@ dependencies = [
 [[package]]
 name = "fennel-lib"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/fennel-lib?branch=master#d187658ed43fd9fa97f46e68ee564c88e463c9d0"
+source = "git+https://github.com/fennelLabs/fennel-lib?branch=master#f33e5a51ce027e6011b7c0eba82221aff6c5a275"
 dependencies = [
  "base64",
  "bincode",

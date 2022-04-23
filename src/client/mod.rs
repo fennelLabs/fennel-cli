@@ -36,6 +36,7 @@ pub async fn handle_connection(
     if server_packet.command == [0] {
         let r = submit_identity_fennel().await;
         if r.len() > 0 {
+            println!("Next available ID was {}", r[0]);
             let id: [u8; 4] = r[0].to_ne_bytes();
             server_packet.identity = id;
             stream.write_all(&server_packet.encode()).await?;
@@ -48,7 +49,7 @@ pub async fn handle_connection(
         println!("Retrieve Identity...");
         stream.write_all(&server_packet.encode()).await?;
         println!("sent");
-        let mut return_packet_binary = [0; 3112];
+        let mut return_packet_binary = [0; 1576];
         stream.read_exact(&mut return_packet_binary).await?;
         let return_packet: FennelServerPacket =
             Decode::decode(&mut (return_packet_binary.as_slice())).unwrap();
@@ -72,12 +73,12 @@ pub async fn handle_connection(
         // Receive all new messages
         stream.write_all(&server_packet.encode()).await?;
         println!("sent");
-        let mut response: Vec<[u8; 3111]> = Vec::new();
+        let mut response: Vec<[u8; 1575]> = Vec::new();
         let mut end = [255];
         stream.read_exact(&mut end).await?;
         while end != [0] {
             println!("{} messages remaining", end[0]);
-            let mut message_buffer = [0; 3111];
+            let mut message_buffer = [0; 1575];
             let mut server_hash = [0; 64];
             let mut intermediate_response_code = [0; 1];
             stream.read_exact(&mut end).await?;
@@ -178,7 +179,7 @@ async fn send_message(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'stati
 }
 
 /// Given a vector of binary-encoded messages, unpacks, decodes, and stores them.
-async fn parse_remote_messages(messages_response: Vec<[u8; 3111]>) -> Vec<Message> {
+async fn parse_remote_messages(messages_response: Vec<[u8; 1575]>) -> Vec<Message> {
     let mut message_list: Vec<Message> = Vec::new();
     for message in messages_response {
         let unpacked_message: Message = Decode::decode(&mut (message.as_slice())).unwrap();
@@ -256,7 +257,7 @@ pub fn handle_generate_keypair() -> ([u8; 16], rsa::RsaPrivateKey, rsa::RsaPubli
             Ok(v) => v,
             Err(_) => {
                 println!("Setting up a new keypair...");
-                let (private_key, public_key) = generate_keypair(8192);
+                let (private_key, public_key) = generate_keypair(4096);
                 println!("Finished.");
 
                 export_keypair_to_file(
@@ -382,7 +383,7 @@ pub fn handle_diffie_hellman_decrypt(
 /// Prepares a short message for transmission as a FennelServerPacket.
 pub fn pack_message(mut ciphertext: Vec<u8>) -> Vec<u8> {
     let iprime: usize = ciphertext.len();
-    ciphertext.resize(1016, 0);
+    ciphertext.resize(504, 0);
     let mut ciphertext_new = (iprime.to_ne_bytes()).to_vec();
     ciphertext_new.extend(ciphertext);
     ciphertext_new
