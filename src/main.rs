@@ -1,8 +1,8 @@
 #![allow(deprecated)]
 
 mod client;
-mod fennel_rpc;
 mod command;
+mod fennel_rpc;
 use std::{error::Error, sync::Arc};
 
 use clap::Parser;
@@ -204,7 +204,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             drop(message_db);
             retrieve_identities().await.unwrap();
         }
-        
+
         Commands::StartRPC {} => {
             println!("Starting RPC on localhost:9030");
             start_rpc().await?;
