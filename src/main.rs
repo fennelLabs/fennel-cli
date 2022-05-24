@@ -1,6 +1,7 @@
 #![allow(deprecated)]
 
 mod client;
+mod fennel_rpc;
 mod command;
 use std::{error::Error, sync::Arc};
 
@@ -18,6 +19,7 @@ use fennel_lib::{
 use tokio::net::TcpStream;
 
 use crate::client::{handle_aes_decrypt, prep_cipher};
+use crate::fennel_rpc::start_rpc;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -201,6 +203,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             drop(identity_db);
             drop(message_db);
             retrieve_identities().await.unwrap();
+        }
+        Commands::StartRPC {} => {
+            println!("Starting RPC on localhost:9030");
+            start_rpc();
         }
     }
 
