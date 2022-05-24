@@ -1,31 +1,13 @@
-use jsonrpc_http_server::jsonrpc_core::IoHandler;
-use jsonrpc_http_server::ServerBuilder;
+use std::net::SocketAddr;
 
-use jsonrpc_core::Result;
-use jsonrpc_derive::rpc;
+use jsonrpsee::http_server::{HttpServerBuilder, HttpServerHandle, RpcModule};
 
-#[rpc]
-pub trait Rpc {
-	#[rpc(name = "add")]
-	fn add(&self, a: u64, b: u64) -> Result<u64>;
-}
+pub async fn start_rpc() -> anyhow::Result<(SocketAddr, HttpServerHandle)> {
+	let server = HttpServerBuilder::default().build("127.0.0.1:9030".parse::<SocketAddr>()?).await?;
+	let mut module = RpcModule::new(());
+	module.register_method("say_hello", |_, _| Ok("lo"))?;
 
-pub struct RpcImpl;
-impl Rpc for RpcImpl {
-	fn add(&self, a: u64, b: u64) -> Result<u64> {
-		Ok(a + b)
-	}
-}
-
-pub fn start_rpc() {
-	let mut io = IoHandler::new();
-	
-	io.extend_with(RpcImpl.to_delegate());
-
-	let server = ServerBuilder::new(io)
-		.threads(3)
-		.start_http(&"127.0.0.1:9030".parse().unwrap())
-		.unwrap();
-
-	server.wait();
+	let addr = server.local_addr()?;
+	let server_handle = server.start(module)?;
+	Ok((addr, server_handle))
 }

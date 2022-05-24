@@ -204,9 +204,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             drop(message_db);
             retrieve_identities().await.unwrap();
         }
+        
         Commands::StartRPC {} => {
             println!("Starting RPC on localhost:9030");
-            start_rpc();
+            start_rpc().await?;
         }
     }
 
