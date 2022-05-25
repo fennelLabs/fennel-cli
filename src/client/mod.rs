@@ -35,7 +35,7 @@ pub async fn handle_connection(
     }
     if server_packet.command == [0] {
         let r = submit_identity_fennel().await;
-        if r.len() > 0 {
+        if !r.is_empty() {
             println!("Next available ID was {}", r[0]);
             let id: [u8; 4] = r[0].to_ne_bytes();
             server_packet.identity = id;
