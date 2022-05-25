@@ -4,7 +4,7 @@ use tokio::net::TcpStream;
 
 use super::traits::FennelRPCServer;
 use super::types::{FennelFingerprint, FennelPublicKeyBytes, FennelSignature};
-use crate::client::{handle_connection, handle_encrypt, handle_generate_keypair, handle_decrypt};
+use crate::client::{handle_connection, handle_decrypt, handle_encrypt, handle_generate_keypair};
 
 pub struct FennelRPCService;
 
