@@ -776,6 +776,7 @@ dependencies = [
  "rand 0.8.5",
  "rocksdb",
  "rsa",
+ "serde",
  "sha3",
  "slice-of-array",
  "sp-keyring",

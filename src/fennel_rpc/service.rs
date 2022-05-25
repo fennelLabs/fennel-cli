@@ -4,7 +4,7 @@ use tokio::net::TcpStream;
 
 use super::traits::FennelRPCServer;
 use super::types::{FennelFingerprint, FennelPublicKeyBytes, FennelSignature};
-use crate::client::handle_connection;
+use crate::client::{handle_connection, handle_encrypt, handle_generate_keypair, handle_decrypt};
 
 pub struct FennelRPCService;
 
@@ -107,5 +107,19 @@ impl FennelRPCServer<FennelFingerprint, FennelSignature, FennelPublicKeyBytes>
         let message_db = get_message_database_handle();
         handle_connection(identity_db, message_db, listener, packet).await?;
         Ok("Messages received".as_bytes().to_vec())
+    }
+
+    async fn encrypt(&self, identity: u32, plaintext: Vec<u8>) -> Result<Vec<u8>, Error> {
+        let identity_db = get_identity_database_handle();
+        Ok(handle_encrypt(
+            identity_db,
+            &identity,
+            &String::from_utf8_lossy(&plaintext),
+        ))
+    }
+
+    async fn decrypt(&self, ciphertext: Vec<u8>) -> Result<Vec<u8>, Error> {
+        let (_, private_key, _) = handle_generate_keypair();
+        Ok(handle_decrypt(ciphertext, &private_key).as_bytes().to_vec())
     }
 }

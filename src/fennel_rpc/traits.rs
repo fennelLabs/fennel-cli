@@ -41,4 +41,10 @@ pub trait FennelRPC<Fingerprint, Signature, PublicKeyBytes> {
         signature: FennelSignature,
         public_key_bytes: FennelPublicKeyBytes,
     ) -> Result<Vec<u8>, Error>;
+
+    #[method(name = "encrypt")]
+    async fn encrypt(&self, identity: u32, plaintext: Vec<u8>) -> Result<Vec<u8>, Error>;
+
+    #[method(name = "decrypt")]
+    async fn decrypt(&self, ciphertext: Vec<u8>) -> Result<Vec<u8>, Error>;
 }
