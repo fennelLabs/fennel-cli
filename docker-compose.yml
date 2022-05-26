@@ -1,0 +1,9 @@
+services:
+  dev:
+    build: .
+    working_dir: /app
+    volumes:
+      - fennel-cli:/app
+    entrypoint: sh docker-entry.sh
+volumes:
+  fennel-cli:

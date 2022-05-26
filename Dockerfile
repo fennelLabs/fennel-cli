@@ -12,4 +12,5 @@ RUN DEBIAN_FRONTEND=noninteractive \
 RUN rustup default stable
 RUN rustup update stable
 
-COPY . /app/fennel-cli
+COPY . /app
+WORKDIR /app
