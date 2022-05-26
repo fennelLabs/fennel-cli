@@ -1,11 +1,10 @@
-use fennel_lib::{get_identity_database_handle};
+use fennel_lib::get_identity_database_handle;
 use jsonrpsee::core::{async_trait, Error};
 
 use super::traits::FennelRPCServer;
 use super::types::{FennelFingerprint, FennelPublicKeyBytes, FennelSignature};
 use crate::client::{
-    handle_decrypt, handle_encrypt, handle_generate_keypair, handle_sign,
-    handle_verify,
+    handle_decrypt, handle_encrypt, handle_generate_keypair, handle_sign, handle_verify,
 };
 
 pub struct FennelRPCService;
