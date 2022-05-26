@@ -1,11 +1,9 @@
-use fennel_lib::get_identity_database_handle;
+use fennel_lib::{encrypt, import_public_key_from_binary, verify};
 use jsonrpsee::core::{async_trait, Error};
 
 use super::traits::FennelRPCServer;
 use super::types::{FennelFingerprint, FennelPublicKeyBytes, FennelSignature};
-use crate::client::{
-    handle_decrypt, handle_encrypt, handle_generate_keypair, handle_sign, handle_verify,
-};
+use crate::client::{handle_decrypt, handle_generate_keypair, handle_sign};
 
 pub struct FennelRPCService;
 
@@ -13,13 +11,14 @@ pub struct FennelRPCService;
 impl FennelRPCServer<FennelFingerprint, FennelSignature, FennelPublicKeyBytes>
     for FennelRPCService
 {
-    async fn encrypt(&self, identity: u32, plaintext: Vec<u8>) -> Result<Vec<u8>, Error> {
-        let identity_db = get_identity_database_handle();
-        Ok(handle_encrypt(
-            identity_db,
-            &identity,
-            &String::from_utf8_lossy(&plaintext),
-        ))
+    async fn encrypt(
+        &self,
+        plaintext: Vec<u8>,
+        public_key_bytes: FennelPublicKeyBytes,
+    ) -> Result<Vec<u8>, Error> {
+        let public_key =
+            import_public_key_from_binary(&public_key_bytes.try_into().unwrap()).unwrap();
+        Ok(encrypt(public_key, plaintext))
     }
 
     async fn decrypt(&self, ciphertext: Vec<u8>) -> Result<Vec<u8>, Error> {
@@ -40,14 +39,10 @@ impl FennelRPCServer<FennelFingerprint, FennelSignature, FennelPublicKeyBytes>
         &self,
         message: Vec<u8>,
         signature: Vec<u8>,
-        identity: u32,
+        public_key_bytes: FennelPublicKeyBytes,
     ) -> Result<bool, Error> {
-        let identity_db = get_identity_database_handle();
-        Ok(handle_verify(
-            identity_db,
-            &String::from_utf8_lossy(&message),
-            &String::from_utf8_lossy(&signature),
-            &identity,
-        ))
+        let public_key =
+            import_public_key_from_binary(&public_key_bytes.try_into().unwrap()).unwrap();
+        Ok(verify(public_key, message, signature))
     }
 }
