@@ -71,4 +71,7 @@ pub enum Commands {
     RetrieveIdentity { id: u32 },
     #[clap()]
     RetrieveIdentities {},
+
+    #[clap()]
+    StartRPC {},
 }
