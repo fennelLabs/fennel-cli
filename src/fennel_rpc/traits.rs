@@ -3,6 +3,9 @@ use jsonrpsee_proc_macros::rpc;
 
 #[rpc(server, client, namespace = "state")]
 pub trait FennelRPC<Fingerprint, Signature, PublicKeyBytes> {
+    #[method(name = "get_or_generate_keypair")]
+    async fn get_or_generate_keypair(&self) -> Result<Vec<u8>, Error>;
+
     #[method(name = "encrypt")]
     async fn encrypt(
         &self,

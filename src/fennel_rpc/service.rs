@@ -1,4 +1,4 @@
-use fennel_lib::{encrypt, import_public_key_from_binary, verify};
+use fennel_lib::{encrypt, export_public_key_to_binary, import_public_key_from_binary, verify};
 use jsonrpsee::core::{async_trait, Error};
 
 use super::traits::FennelRPCServer;
@@ -11,6 +11,18 @@ pub struct FennelRPCService;
 impl FennelRPCServer<FennelFingerprint, FennelSignature, FennelPublicKeyBytes>
     for FennelRPCService
 {
+    async fn get_or_generate_keypair(&self) -> Result<Vec<u8>, Error> {
+        let (_, _, public_key) = handle_generate_keypair();
+        let public_key_bytes = match export_public_key_to_binary(&public_key) {
+            Ok(bytestring) => bytestring,
+            Err(error) => panic!(
+                "Problem with exporting a public key to a bytestring: {}",
+                error
+            ),
+        };
+        Ok(public_key_bytes.to_vec())
+    }
+
     async fn encrypt(
         &self,
         plaintext: Vec<u8>,
