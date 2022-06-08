@@ -65,6 +65,14 @@ pub async fn start_rpc() -> anyhow::Result<()> {
         Ok(verify(public_key, message, signature))
     })?;
 
+    module.register_method("whiteflag_encode", |_, _| {
+
+    })?;
+
+    module.register_method("whiteflag_decode", |_, _| {
+        
+    })?;
+
     server.local_addr()?;
     server.start(module)?;
 
