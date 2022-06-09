@@ -1,9 +1,8 @@
+use crate::client::{handle_decrypt, handle_generate_keypair, handle_sign};
+use fennel_lib::{encrypt, export_public_key_to_binary, import_public_key_from_binary, verify};
 use jsonrpsee::ws_server::{RpcModule, WsServerBuilder};
 use std::net::SocketAddr;
-
-use fennel_lib::{encrypt, export_public_key_to_binary, import_public_key_from_binary, verify};
-
-use crate::client::{handle_decrypt, handle_generate_keypair, handle_sign};
+use whiteflag_rust::{wf_core, wf_models};
 
 #[allow(unreachable_code)]
 pub async fn start_rpc() -> anyhow::Result<()> {
@@ -47,11 +46,9 @@ pub async fn start_rpc() -> anyhow::Result<()> {
         let message: Vec<u8> = params.one()?;
 
         let (_, private_key, _) = handle_generate_keypair();
-        Ok(
-            handle_sign(&String::from_utf8_lossy(&message), private_key)
-                .as_bytes()
-                .to_vec(),
-        )
+        Ok(handle_sign(&String::from_utf8_lossy(&message), private_key)
+            .as_bytes()
+            .to_vec())
     })?;
 
     module.register_method("verify", |params, _| {
@@ -63,6 +60,19 @@ pub async fn start_rpc() -> anyhow::Result<()> {
         let public_key =
             import_public_key_from_binary(&public_key_bytes.try_into().unwrap()).unwrap();
         Ok(verify(public_key, message, signature))
+    })?;
+
+    module.register_method("whiteflag_encode", |params, _| {
+        let json: String = params.parse()?;
+        let message: wf_models::AuthenticationMessage = serde_json::from_str(&json)?;
+        let hex = wf_core::creator::encode(&message.to_field_values());
+        Ok(hex)
+    })?;
+
+    module.register_method("whiteflag_decode", |params, _| {
+        let hex: String = params.parse()?;
+        let values = wf_core::creator::decode(hex);
+        Ok({})
     })?;
 
     server.local_addr()?;
