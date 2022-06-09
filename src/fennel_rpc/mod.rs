@@ -1,9 +1,8 @@
 use jsonrpsee::ws_server::{RpcModule, WsServerBuilder};
 use std::net::SocketAddr;
-
 use fennel_lib::{encrypt, export_public_key_to_binary, import_public_key_from_binary, verify};
-
 use crate::client::{handle_decrypt, handle_generate_keypair, handle_sign};
+use whiteflag_rust::{wf_models, wf_core};
 
 #[allow(unreachable_code)]
 pub async fn start_rpc() -> anyhow::Result<()> {
@@ -65,12 +64,17 @@ pub async fn start_rpc() -> anyhow::Result<()> {
         Ok(verify(public_key, message, signature))
     })?;
 
-    module.register_method("whiteflag_encode", |_, _| {
-
+    module.register_method("whiteflag_encode", |params, _| {
+        let json: String = params.parse()?;
+        let message: wf_models::AuthenticationMessage = serde_json::from_str(&json)?;
+        let hex = wf_core::creator::encode(&message.to_field_values());
+        Ok(hex)
     })?;
 
-    module.register_method("whiteflag_decode", |_, _| {
-        
+    module.register_method("whiteflag_decode", |params, _| {
+        let hex: &str = params.parse()?;
+        let values = wf_core::creator::decode(hex);
+        Ok({})
     })?;
 
     server.local_addr()?;
