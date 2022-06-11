@@ -772,7 +772,6 @@ dependencies = [
  "jsonrpsee-http-client",
  "jsonrpsee-http-server",
  "jsonrpsee-proc-macros",
- "once_cell",
  "parity-scale-codec",
  "rand 0.8.5",
  "rocksdb",
@@ -818,7 +817,7 @@ dependencies = [
 [[package]]
 name = "fennel-whiteflag"
 version = "1.0.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=api-prep#9c7132a9acb4d869fbe2e44c7f7a39f757328bad"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#7290352b7bd672e0053873ddea97351637f6ab00"
 dependencies = [
  "hex",
  "regex",
