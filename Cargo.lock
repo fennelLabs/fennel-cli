@@ -772,6 +772,7 @@ dependencies = [
  "jsonrpsee-http-client",
  "jsonrpsee-http-server",
  "jsonrpsee-proc-macros",
+ "once_cell",
  "parity-scale-codec",
  "rand 0.8.5",
  "rocksdb",
