@@ -2,7 +2,6 @@ use crate::client::{handle_decrypt, handle_generate_keypair, handle_sign};
 use fennel_lib::{encrypt, export_public_key_to_binary, import_public_key_from_binary, verify};
 use jsonrpsee::ws_server::{RpcModule, WsServerBuilder};
 use std::net::SocketAddr;
-use whiteflag_rust::{wf_core, wf_models};
 
 #[allow(unreachable_code)]
 pub async fn start_rpc() -> anyhow::Result<()> {
@@ -64,15 +63,14 @@ pub async fn start_rpc() -> anyhow::Result<()> {
 
     module.register_method("whiteflag_encode", |params, _| {
         let json: String = params.parse()?;
-        let message: wf_models::AuthenticationMessage = serde_json::from_str(&json)?;
-        let hex = wf_core::creator::encode(&message.to_field_values());
+        let hex = whiteflag_rust::encode_from_json(&json).unwrap();
         Ok(hex)
     })?;
 
     module.register_method("whiteflag_decode", |params, _| {
         let hex: String = params.parse()?;
-        let values = wf_core::creator::decode(hex);
-        Ok({})
+        let message = whiteflag_rust::decode_from_hex(hex).unwrap();
+        Ok(message)
     })?;
 
     server.local_addr()?;
