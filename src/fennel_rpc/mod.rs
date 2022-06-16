@@ -25,7 +25,7 @@ pub async fn start_rpc() -> anyhow::Result<()> {
                 error
             ),
         };
-        Ok(public_key_bytes.to_vec())
+        Ok(hex::encode(public_key_bytes.to_vec()))
     })?;
 
     module.register_method("encrypt", |params, _| {
@@ -37,7 +37,7 @@ pub async fn start_rpc() -> anyhow::Result<()> {
 
         let public_key =
             import_public_key_from_binary(&public_key_bytes.try_into().unwrap()).unwrap();
-        Ok(encrypt(public_key, plaintext))
+        Ok(hex::encode(encrypt(public_key, plaintext)))
     })?;
 
     module.register_method("decrypt", |params, _| {
@@ -47,7 +47,7 @@ pub async fn start_rpc() -> anyhow::Result<()> {
         let ciphertext = params_struct.ciphertext.into_bytes();
 
         let (_, private_key, _) = handle_generate_keypair();
-        Ok(handle_decrypt(ciphertext, &private_key).as_bytes().to_vec())
+        Ok(hex::encode(handle_decrypt(ciphertext, &private_key).as_bytes().to_vec()))
     })?;
 
     module.register_method("sign", |params, _| {
@@ -57,9 +57,9 @@ pub async fn start_rpc() -> anyhow::Result<()> {
         let message = params_struct.message.as_bytes();
 
         let (_, private_key, _) = handle_generate_keypair();
-        Ok(handle_sign(&String::from_utf8_lossy(&message), private_key)
+        Ok(hex::encode(handle_sign(&String::from_utf8_lossy(&message), private_key)
             .as_bytes()
-            .to_vec())
+            .to_vec()))
     })?;
 
     module.register_method("verify", |params, _| {
