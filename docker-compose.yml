@@ -5,5 +5,7 @@ services:
     volumes:
       - fennel-cli:/app
     entrypoint: sh docker-entry.sh
+    ports:
+      - 9030:9030
 volumes:
   fennel-cli:

@@ -5,7 +5,7 @@ use fennel_lib::{encrypt, export_public_key_to_binary, import_public_key_from_bi
 use jsonrpsee::ws_server::{RpcModule, WsServerBuilder};
 use std::net::SocketAddr;
 
-use self::types::{EncryptionPacket, DecryptionPacket, SignPacket, VerifyPacket};
+use self::types::{DecryptionPacket, EncryptionPacket, SignPacket, VerifyPacket};
 
 #[allow(unreachable_code)]
 pub async fn start_rpc() -> anyhow::Result<()> {
@@ -30,8 +30,9 @@ pub async fn start_rpc() -> anyhow::Result<()> {
 
     module.register_method("encrypt", |params, _| {
         let json: String = params.parse()?;
-        let params_struct: EncryptionPacket = serde_json::from_str(&json).expect("JSON was misformatted.");
-        
+        let params_struct: EncryptionPacket =
+            serde_json::from_str(&json).expect("JSON was misformatted.");
+
         let public_key_bytes: Vec<u8> = params_struct.public_key_bytes.into_bytes();
         let plaintext: Vec<u8> = params_struct.plaintext.into_bytes();
 
@@ -42,30 +43,37 @@ pub async fn start_rpc() -> anyhow::Result<()> {
 
     module.register_method("decrypt", |params, _| {
         let json: String = params.parse()?;
-        let params_struct: DecryptionPacket = serde_json::from_str(&json).expect("JSON was misformatted.");
+        let params_struct: DecryptionPacket =
+            serde_json::from_str(&json).expect("JSON was misformatted.");
 
         let ciphertext = params_struct.ciphertext.into_bytes();
 
         let (_, private_key, _) = handle_generate_keypair();
-        Ok(hex::encode(handle_decrypt(ciphertext, &private_key).as_bytes().to_vec()))
+        Ok(hex::encode(
+            handle_decrypt(ciphertext, &private_key).as_bytes().to_vec(),
+        ))
     })?;
 
     module.register_method("sign", |params, _| {
         let json: String = params.parse()?;
-        let params_struct: SignPacket = serde_json::from_str(&json).expect("JSON was misformatted.");
+        let params_struct: SignPacket =
+            serde_json::from_str(&json).expect("JSON was misformatted.");
 
         let message = params_struct.message.as_bytes();
 
         let (_, private_key, _) = handle_generate_keypair();
-        Ok(hex::encode(handle_sign(&String::from_utf8_lossy(&message), private_key)
-            .as_bytes()
-            .to_vec()))
+        Ok(hex::encode(
+            handle_sign(&String::from_utf8_lossy(&message), private_key)
+                .as_bytes()
+                .to_vec(),
+        ))
     })?;
 
     module.register_method("verify", |params, _| {
         let json: String = params.parse()?;
-        let params_struct: VerifyPacket = serde_json::from_str(&json).expect("JSON was misformatted.");
-        
+        let params_struct: VerifyPacket =
+            serde_json::from_str(&json).expect("JSON was misformatted.");
+
         let public_key_bytes: Vec<u8> = params_struct.public_key_bytes.into_bytes();
         let message: Vec<u8> = params_struct.message.into_bytes();
         let signature: Vec<u8> = params_struct.signature.into_bytes();
