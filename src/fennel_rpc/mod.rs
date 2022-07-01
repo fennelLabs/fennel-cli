@@ -90,7 +90,7 @@ pub async fn start_rpc() -> anyhow::Result<()> {
         let result = panic::catch_unwind(|| whiteflag_rust::encode_from_json(&json).unwrap());
         let hex = match result {
             Ok(v) => v,
-            Err(e) => format!("{:?}", e)
+            Err(e) => format!("{:?}", e),
         };
         Ok(hex)
     })?;
