@@ -1,5 +1,7 @@
 mod types;
 
+use std::panic;
+
 use crate::client::{handle_decrypt, handle_generate_keypair, handle_sign};
 use fennel_lib::{encrypt, export_public_key_to_binary, import_public_key_from_binary, verify};
 use jsonrpsee::ws_server::{RpcModule, WsServerBuilder};
@@ -85,7 +87,11 @@ pub async fn start_rpc() -> anyhow::Result<()> {
 
     module.register_method("whiteflag_encode", |params, _| {
         let json: String = params.parse()?;
-        let hex = whiteflag_rust::encode_from_json(&json).unwrap();
+        let result = panic::catch_unwind(|| whiteflag_rust::encode_from_json(&json).unwrap());
+        let hex = match result {
+            Ok(v) => v,
+            Err(e) => format!("{:?}", e),
+        };
         Ok(hex)
     })?;
 
