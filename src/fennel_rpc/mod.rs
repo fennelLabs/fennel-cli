@@ -2,12 +2,20 @@ mod types;
 
 use std::panic;
 
-use crate::client::{handle_decrypt, handle_generate_keypair, handle_sign};
+use crate::client::{
+    handle_aes_decrypt, handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one,
+    handle_diffie_hellman_two, handle_generate_keypair, handle_sign, pack_message,
+    prep_cipher_from_secret, unpack_message,
+};
 use fennel_lib::{encrypt, export_public_key_to_binary, import_public_key_from_binary, verify};
 use jsonrpsee::ws_server::{RpcModule, WsServerBuilder};
 use std::net::SocketAddr;
 
-use self::types::{DecryptionPacket, EncryptionPacket, SignPacket, VerifyPacket};
+use self::types::{
+    AcceptEncryptionChannelPacket, AcceptEncryptionChannelResponse, DecryptionPacket,
+    DhDecryptPacket, DhEncryptPacket, EncryptionPacket, GenerateEncryptionChannelResponse,
+    SignPacket, VerifyPacket,
+};
 
 #[allow(unreachable_code)]
 pub async fn start_rpc() -> anyhow::Result<()> {
@@ -28,6 +36,53 @@ pub async fn start_rpc() -> anyhow::Result<()> {
             ),
         };
         Ok(hex::encode(public_key_bytes.to_vec()))
+    })?;
+
+    module.register_method("generate_encryption_channel", |_, _| {
+        let (secret, public) = handle_diffie_hellman_one();
+        Ok(GenerateEncryptionChannelResponse {
+            secret: hex::encode(secret.to_bytes()),
+            public: hex::encode(public.to_bytes()),
+        })
+    })?;
+
+    module.register_method("accept_encryption_channel", |params, _| {
+        let json: String = params.parse()?;
+        let params_struct: AcceptEncryptionChannelPacket =
+            serde_json::from_str(&json).expect("JSON was misformatted.");
+        let shared_secret = handle_diffie_hellman_two(
+            params_struct.secret.to_string(),
+            params_struct.public.to_string(),
+        );
+        Ok(AcceptEncryptionChannelResponse {
+            shared_secret: hex::encode(shared_secret.to_bytes()),
+        })
+    })?;
+
+    module.register_method("dh_encrypt", |params, _| {
+        let json: String = params.parse()?;
+        let params_struct: DhEncryptPacket =
+            serde_json::from_str(&json).expect("JSON was misformatted.");
+        let shared_secret: [u8; 32] = hex::decode(params_struct.shared_secret)
+            .unwrap()
+            .try_into()
+            .expect("Unable to match shared secret to a length of 32 bytes.");
+        let cipher = prep_cipher_from_secret(&shared_secret);
+        let ciphertext = handle_aes_encrypt(cipher, params_struct.plaintext.to_string());
+        Ok(hex::encode(pack_message(ciphertext)))
+    })?;
+
+    module.register_method("dh_decrypt", |params, _| {
+        let json: String = params.parse()?;
+        let params_struct: DhDecryptPacket =
+            serde_json::from_str(&json).expect("JSON was misformatted.");
+        let ciphertext_mod = unpack_message(params_struct.ciphertext.into_bytes());
+        let shared_secret: [u8; 32] = hex::decode(params_struct.shared_secret)
+            .unwrap()
+            .try_into()
+            .expect("Unable to match shared secret to a length of 32 bytes.");
+        let cipher = prep_cipher_from_secret(&shared_secret);
+        Ok(handle_aes_decrypt(cipher, ciphertext_mod.to_vec()))
     })?;
 
     module.register_method("encrypt", |params, _| {
