@@ -90,6 +90,8 @@ pub async fn start_rpc() -> anyhow::Result<()> {
         let params_struct: EncryptionPacket =
             serde_json::from_str(&json).expect("JSON was misformatted.");
 
+        println!("EncryptionPacket: {:?}", params_struct);
+
         let public_key_bytes: Vec<u8> = params_struct.public_key_bytes.into_bytes();
         let plaintext: Vec<u8> = params_struct.plaintext.into_bytes();
 
