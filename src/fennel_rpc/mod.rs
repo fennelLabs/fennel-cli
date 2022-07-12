@@ -92,7 +92,7 @@ pub async fn start_rpc() -> anyhow::Result<()> {
 
         println!("EncryptionPacket: {:?}", params_struct);
 
-        let public_key_bytes: Vec<u8> = params_struct.public_key_bytes.into_bytes();
+        let public_key_bytes: Vec<u8> = hex::decode(params_struct.public_key_bytes).unwrap();
         let plaintext: Vec<u8> = params_struct.plaintext.into_bytes();
 
         let public_key =
