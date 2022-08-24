@@ -3,12 +3,12 @@ mod tests;
 
 use codec::{Decode, Encode};
 use fennel_lib::{
-    aes_decrypt, aes_encrypt, export_keypair_to_file, export_public_key_to_binary,
+    export_keypair_to_file, export_public_key_to_binary,
     generate_keypair, get_session_public_key, get_session_secret, get_shared_secret, hash,
     import_keypair_from_file, import_public_key_from_binary, insert_identity, insert_message,
     retrieve_identity, retrieve_messages,
     rsa_tools::{decrypt, encrypt},
-    sign, verify, AESCipher, FennelServerPacket, Identity, Message, TransactionHandler,
+    sign, verify, AESCipher, FennelCipher, FennelServerPacket, Identity, Message, TransactionHandler,
 };
 use rocksdb::DB;
 use rsa::RsaPrivateKey;
@@ -335,12 +335,12 @@ pub fn prep_cipher_from_secret(shared_secret: &[u8; 32]) -> AESCipher {
 
 /// Uses a known cipher to execute AES encryption.
 pub fn handle_aes_encrypt(cipher: AESCipher, plaintext: String) -> Vec<u8> {
-    aes_encrypt(&cipher.encrypt_key, plaintext)
+    cipher.encrypt(plaintext)
 }
 
 /// Uses a known cipher to execute AES decryption.
 pub fn handle_aes_decrypt(cipher: AESCipher, ciphertext: Vec<u8>) -> String {
-    aes_decrypt(&cipher.decrypt_key, ciphertext)
+    String::from_utf8_lossy(&cipher.decrypt(ciphertext)).to_string()
 }
 
 /// Creates a secret and public key for use in Diffie-Hellman.
