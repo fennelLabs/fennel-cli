@@ -24,7 +24,7 @@ hex = "0.4.3"
 x25519-dalek = "2.0.0-pre.1"
 codec = { version = "2.3.1", package = "parity-scale-codec", features = ["derive"] }
 fennel-lib = { git = "https://github.com/fennelLabs/fennel-lib", branch = "master", package = "fennel-lib" }
-whiteflag-rust = { git = "https://github.com/fennelLabs/whiteflag-rust", branch = "main", package = "fennel-whiteflag" }
+whiteflag-rust = { git = "https://github.com/fennelLabs/whiteflag-rust", branch = "release/v0.2.2", package = "fennel-whiteflag" }
 futures = "0.3"
 sp-keyring = "5.0.0"
 subxt = "0.17.0"

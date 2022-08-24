@@ -3,12 +3,13 @@ mod tests;
 
 use codec::{Decode, Encode};
 use fennel_lib::{
-    export_keypair_to_file, export_public_key_to_binary,
-    generate_keypair, get_session_public_key, get_session_secret, get_shared_secret, hash,
-    import_keypair_from_file, import_public_key_from_binary, insert_identity, insert_message,
-    retrieve_identity, retrieve_messages,
+    export_keypair_to_file, export_public_key_to_binary, generate_keypair, get_session_public_key,
+    get_session_secret, get_shared_secret, hash, import_keypair_from_file,
+    import_public_key_from_binary, insert_identity, insert_message, retrieve_identity,
+    retrieve_messages,
     rsa_tools::{decrypt, encrypt},
-    sign, verify, AESCipher, FennelCipher, FennelServerPacket, Identity, Message, TransactionHandler,
+    sign, verify, AESCipher, FennelCipher, FennelServerPacket, Identity, Message,
+    TransactionHandler,
 };
 use rocksdb::DB;
 use rsa::RsaPrivateKey;
