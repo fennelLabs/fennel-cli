@@ -838,7 +838,7 @@ dependencies = [
 [[package]]
 name = "fennel-whiteflag"
 version = "1.0.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=release/v0.2.2#29ebf07869940a4ea92c325425e2ff4c8c32bff0"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#1810e5453db2f02f46a536538ef24cb22e6bf031"
 dependencies = [
  "fennel-lib",
  "hex",
