@@ -1,14 +1,16 @@
 use std::sync::Arc;
 
 use fennel_lib::{
-    export_public_key_to_binary, get_identity_database_handle, get_message_database_handle,
-    insert_identity, insert_message, retrieve_identity, retrieve_messages, sign, verify, Identity,
-    Message,
+    get_identity_database_handle, get_message_database_handle, insert_identity, insert_message,
+    retrieve_identity, retrieve_messages, sign, verify, Identity, Message,
 };
 
-use crate::client::{
-    handle_diffie_hellman_decrypt, handle_diffie_hellman_encrypt, handle_sign, handle_verify,
-    prep_cipher,
+use crate::{
+    client::{
+        handle_diffie_hellman_decrypt, handle_diffie_hellman_encrypt, handle_sign, handle_verify,
+        prep_cipher,
+    },
+    convert_rsa,
 };
 
 use super::{
@@ -24,7 +26,7 @@ fn test_handle_encrypt_and_decrypt() {
     let db_2 = Arc::clone(&db);
 
     let (_, private_key, public_key) = handle_generate_keypair();
-    let key_bytes = export_public_key_to_binary(&public_key).expect("failed to decode public key");
+    let key_bytes = convert_rsa(public_key);
 
     let identity: Identity = Identity {
         id: [0; 4],
@@ -45,7 +47,7 @@ fn test_handle_sign_and_verify() {
     let db = get_identity_database_handle();
     let db_2 = Arc::clone(&db);
     let (_, private_key, public_key) = handle_generate_keypair();
-    let key_bytes = export_public_key_to_binary(&public_key).expect("failed to decode public key");
+    let key_bytes = convert_rsa(public_key);
 
     let identity: Identity = Identity {
         id: [0; 4],
@@ -77,10 +79,12 @@ fn test_handle_backlog_decrypt() {
     let (_, private_key_loaded, public_key_loaded) = handle_generate_keypair();
     assert_eq!(&private_key, &private_key_loaded);
 
+    let pk_526 = convert_rsa(public_key);
+
     let identity = Identity {
         id: [9, 0, 0, 0],
         fingerprint,
-        public_key: export_public_key_to_binary(&public_key).unwrap(),
+        public_key: pk_526.clone(),
         shared_secret_key: [0; 32],
     };
 
@@ -99,11 +103,11 @@ fn test_handle_backlog_decrypt() {
         sender_id: [9, 0, 0, 0],
         fingerprint,
         message: ciphertext_array.try_into().unwrap(),
-        signature: sign(private_key, ciphertext_sign.try_into().unwrap())
+        signature: sign(&private_key, ciphertext_sign.try_into().unwrap())
             .to_vec()
             .try_into()
             .unwrap(),
-        public_key: export_public_key_to_binary(&public_key).unwrap(),
+        public_key: pk_526.clone(),
         recipient_id: [9, 0, 0, 0],
         message_type: [0],
     };
@@ -116,7 +120,7 @@ fn test_handle_backlog_decrypt() {
     let messages = retrieve_messages(message_db_2, identity);
     let encoded_ciphertext: [u8; 512] = ciphertext.try_into().unwrap();
     assert!(verify(
-        public_key_loaded,
+        &public_key_loaded,
         messages[0].message.to_vec(),
         messages[0].signature.to_vec()
     ));
@@ -125,7 +129,7 @@ fn test_handle_backlog_decrypt() {
     let identity_copy = Identity {
         id: [9, 0, 0, 0],
         fingerprint: fingerprint,
-        public_key: export_public_key_to_binary(&public_key).unwrap(),
+        public_key: pk_526.clone(),
         shared_secret_key: [0; 32],
     };
 
@@ -176,10 +180,12 @@ fn test_handle_backlog_decrypt_with_dh() {
     let (_, private_key_loaded, public_key_loaded) = handle_generate_keypair();
     assert_eq!(&private_key, &private_key_loaded);
 
+    let pk_526 = convert_rsa(public_key);
+
     let identity = Identity {
         id: [8, 0, 0, 0],
         fingerprint,
-        public_key: export_public_key_to_binary(&public_key).unwrap(),
+        public_key: pk_526.clone(),
         shared_secret_key: shared1.to_bytes(),
     };
 
@@ -204,11 +210,11 @@ fn test_handle_backlog_decrypt_with_dh() {
         sender_id: [8, 0, 0, 0],
         fingerprint,
         message: ciphertext_array.try_into().unwrap(),
-        signature: sign(private_key, ciphertext_sign.try_into().unwrap())
+        signature: sign(&private_key, ciphertext_sign.try_into().unwrap())
             .to_vec()
             .try_into()
             .unwrap(),
-        public_key: export_public_key_to_binary(&public_key).unwrap(),
+        public_key: pk_526.clone(),
         recipient_id: [8, 0, 0, 0],
         message_type: [2],
     };
@@ -221,7 +227,7 @@ fn test_handle_backlog_decrypt_with_dh() {
     let messages = retrieve_messages(message_db_2, identity);
     let encoded_ciphertext: [u8; 512] = ciphertext.try_into().unwrap();
     assert!(verify(
-        public_key_loaded,
+        &public_key_loaded,
         messages[0].message.to_vec(),
         messages[0].signature.to_vec()
     ));
@@ -230,7 +236,7 @@ fn test_handle_backlog_decrypt_with_dh() {
     let identity_copy = Identity {
         id: [8, 0, 0, 0],
         fingerprint: fingerprint,
-        public_key: export_public_key_to_binary(&public_key).unwrap(),
+        public_key: pk_526.clone(),
         shared_secret_key: [0; 32],
     };
 

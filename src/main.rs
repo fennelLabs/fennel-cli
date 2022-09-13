@@ -3,8 +3,6 @@
 mod client;
 mod command;
 mod fennel_rpc;
-use std::{error::Error, sync::Arc};
-
 use clap::Parser;
 use client::{
     handle_aes_encrypt, handle_backlog_decrypt, handle_connection, handle_decrypt,
@@ -13,9 +11,11 @@ use client::{
 };
 use command::{Cli, Commands};
 use fennel_lib::{
-    export_public_key_to_binary, get_identity_database_handle, get_message_database_handle,
-    insert_identity, retrieve_identity, sign, FennelServerPacket, Identity,
+    get_identity_database_handle, get_message_database_handle, insert_identity, retrieve_identity,
+    sign, FennelRSAPublicKey, FennelServerPacket, Identity,
 };
+use rsa::RsaPublicKey;
+use std::{error::Error, sync::Arc};
 use tokio::net::TcpStream;
 
 use crate::client::{handle_aes_decrypt, prep_cipher};
@@ -29,6 +29,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let message_db = get_message_database_handle();
 
     let (fingerprint, private_key, public_key) = handle_generate_keypair();
+    let pk = FennelRSAPublicKey::new(public_key).unwrap();
+    let pk_sized: [u8; 526] = convert_to_sized_array(pk.as_u8().to_vec());
 
     match &args.command {
         Commands::Encrypt {
@@ -82,8 +84,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 identity: sender_id.to_ne_bytes(),
                 fingerprint,
                 message: ciphertext.to_owned().try_into().unwrap(),
-                signature: sign(private_key, ciphertext).to_vec().try_into().unwrap(),
-                public_key: export_public_key_to_binary(&public_key).unwrap(),
+                signature: sign(&private_key, ciphertext).to_vec().try_into().unwrap(),
+                public_key: pk.as_u8().try_into().unwrap(),
                 recipient: recipient_id.to_ne_bytes(),
                 message_type: [2; 1],
             };
@@ -130,7 +132,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             Identity {
                 id: identity.to_ne_bytes(),
                 fingerprint,
-                public_key: export_public_key_to_binary(&public_key).unwrap(),
+                public_key: pk_sized.clone(),
                 shared_secret_key: [0; 32],
             },
             private_key,
@@ -142,8 +144,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 identity: [0; 4],
                 fingerprint,
                 message: [0; 512],
-                signature: sign(private_key, [0; 512].to_vec()).try_into().unwrap(),
-                public_key: export_public_key_to_binary(&public_key).unwrap(),
+                signature: sign(&private_key, [0; 512].to_vec()).try_into().unwrap(),
+                public_key: pk_sized.clone(),
                 recipient: [0; 4],
                 message_type: [0; 1],
             };
@@ -162,8 +164,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 identity: sender_id.to_ne_bytes(),
                 fingerprint,
                 message: ciphertext.to_owned().try_into().unwrap(),
-                signature: sign(private_key, ciphertext).to_vec().try_into().unwrap(),
-                public_key: export_public_key_to_binary(&public_key).unwrap(),
+                signature: sign(&private_key, ciphertext).to_vec().try_into().unwrap(),
+                public_key: pk_sized.clone(),
                 recipient: recipient_id.to_ne_bytes(),
                 message_type: [1; 1],
             };
@@ -176,8 +178,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 identity: id.to_ne_bytes(),
                 fingerprint,
                 message: [0; 512],
-                signature: sign(private_key, [0; 512].to_vec()).try_into().unwrap(),
-                public_key: export_public_key_to_binary(&public_key).unwrap(),
+                signature: sign(&private_key, [0; 512].to_vec()).try_into().unwrap(),
+                public_key: pk_sized.clone(),
                 recipient: [0; 4],
                 message_type: [0; 1],
             };
@@ -190,8 +192,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 identity: id.to_ne_bytes(),
                 fingerprint,
                 message: [0; 512],
-                signature: sign(private_key, [0; 512].to_vec()).try_into().unwrap(),
-                public_key: export_public_key_to_binary(&public_key).unwrap(),
+                signature: sign(&private_key, [0; 512].to_vec()).try_into().unwrap(),
+                public_key: pk_sized.clone(),
                 recipient: [0; 4],
                 message_type: [0; 1],
             };
@@ -212,4 +214,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     Ok(())
+}
+
+fn convert_to_sized_array<T, const N: usize>(v: Vec<T>) -> [T; N] {
+    v.try_into()
+        .unwrap_or_else(|v: Vec<T>| panic!("Expected a Vec of length {} but it was {}", N, v.len()))
+}
+
+pub fn convert_rsa(pk: RsaPublicKey) -> [u8; 526] {
+    convert_to_sized_array(FennelRSAPublicKey::new(pk).unwrap().as_u8().to_vec())
 }
