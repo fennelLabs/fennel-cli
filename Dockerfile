@@ -14,3 +14,8 @@ RUN rustup update stable
 
 COPY . /app
 WORKDIR /app
+
+EXPOSE 9030
+
+# start app
+CMD ["cargo", "run", "--", "start-rpc"]
