@@ -3,13 +3,12 @@ mod tests;
 
 use codec::{Decode, Encode};
 use fennel_lib::{
-    export_keypair_to_file, export_public_key_to_binary, generate_keypair, get_session_public_key,
-    get_session_secret, get_shared_secret, hash, import_keypair_from_file,
-    import_public_key_from_binary, insert_identity, insert_message, retrieve_identity,
-    retrieve_messages,
+    export_keypair_to_file, generate_keypair, get_session_public_key, get_session_secret,
+    get_shared_secret, hash, import_keypair_from_file, insert_identity, insert_message,
+    retrieve_identity, retrieve_messages,
     rsa_tools::{decrypt, encrypt},
-    sign, verify, AESCipher, FennelCipher, FennelServerPacket, Identity, Message,
-    TransactionHandler,
+    sign, verify, AESCipher, FennelCipher, FennelRSAPublicKey, FennelServerPacket, Identity,
+    Message, TransactionHandler,
 };
 use rocksdb::DB;
 use rsa::RsaPrivateKey;
@@ -130,9 +129,12 @@ pub async fn retrieve_identities() -> Result<()> {
 
 /// Given a FennelServerPacket, make sure that the signature applies correctly.
 fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
-    let pub_key =
-        import_public_key_from_binary(&packet.public_key).expect("public key failed to import");
-    verify(pub_key, packet.message.to_vec(), packet.signature.to_vec())
+    let pub_key = FennelRSAPublicKey::from_u8(&packet.public_key).unwrap();
+    verify(
+        &pub_key.pk,
+        packet.message.to_vec(),
+        packet.signature.to_vec(),
+    )
 }
 
 async fn submit_identity_fennel() -> Vec<u32> {
@@ -184,8 +186,9 @@ async fn parse_remote_messages(messages_response: Vec<[u8; 1575]>) -> Vec<Messag
     let mut message_list: Vec<Message> = Vec::new();
     for message in messages_response {
         let unpacked_message: Message = Decode::decode(&mut (message.as_slice())).unwrap();
+        let pub_key = FennelRSAPublicKey::from_u8(&unpacked_message.public_key).unwrap();
         if verify(
-            import_public_key_from_binary(&unpacked_message.public_key).unwrap(),
+            &pub_key.pk,
             unpacked_message.message.to_vec(),
             unpacked_message.signature.to_vec(),
         ) {
@@ -220,11 +223,12 @@ pub fn handle_backlog_decrypt(
     let message_list = retrieve_messages(message_db, identity);
     for message in message_list {
         let sender_identity = retrieve_identity(Arc::clone(&identity_db), message.sender_id);
+        let pub_key = FennelRSAPublicKey::from_u8(&message.public_key).unwrap();
         println!(
             "From: {:?} Verified: {:?}",
             u32::from_ne_bytes(message.sender_id),
             verify(
-                import_public_key_from_binary(&sender_identity.public_key).unwrap(),
+                &pub_key.pk,
                 message.message.to_vec(),
                 message.signature.to_vec()
             )
@@ -272,18 +276,18 @@ pub fn handle_generate_keypair() -> ([u8; 16], rsa::RsaPrivateKey, rsa::RsaPubli
                 (private_key, public_key)
             }
         };
-    let fingerprint: [u8; 16] = hash(export_public_key_to_binary(&public_key).unwrap())[0..16]
-        .try_into()
-        .unwrap();
-    (fingerprint, private_key, public_key)
+
+    let pub_key = FennelRSAPublicKey::new(public_key).unwrap();
+    let fingerprint: [u8; 16] = hash(pub_key.as_u8())[0..16].try_into().unwrap();
+    (fingerprint, private_key, pub_key.pk)
 }
 
 /// Handles RSA encryption.
 pub fn handle_encrypt(db_lock: Arc<Mutex<DB>>, identity: &u32, plaintext: &str) -> Vec<u8> {
     let id_array = identity.to_ne_bytes();
     let recipient = retrieve_identity(db_lock, id_array);
-    let public_key = import_public_key_from_binary(&recipient.public_key).unwrap();
-    encrypt(public_key, plaintext.as_bytes().to_vec())
+    let pub_key = FennelRSAPublicKey::from_u8(&recipient.public_key).unwrap();
+    encrypt(&pub_key.pk, plaintext.as_bytes().to_vec())
 }
 
 /// Handles RSA decryption.
@@ -294,7 +298,7 @@ pub fn handle_decrypt(ciphertext: Vec<u8>, private_key: &rsa::RsaPrivateKey) -> 
 
 /// Issues a signature based on the current user's identity.
 pub fn handle_sign(message: &str, private_key: rsa::RsaPrivateKey) -> String {
-    hex::encode(sign(private_key, message.as_bytes().to_vec()))
+    hex::encode(sign(&private_key, message.as_bytes().to_vec()))
 }
 
 /// Verifies a signature based on the identity it claims to be from.
@@ -306,9 +310,9 @@ pub fn handle_verify(
 ) -> bool {
     let id_array = identity.to_ne_bytes();
     let recipient = retrieve_identity(db_lock, id_array);
-    let public_key = import_public_key_from_binary(&recipient.public_key).unwrap();
+    let pub_key = FennelRSAPublicKey::from_u8(&recipient.public_key).unwrap();
     verify(
-        public_key,
+        &pub_key.pk,
         message.as_bytes().to_vec(),
         hex::decode::<&String>(&String::from(signature)).unwrap(),
     )

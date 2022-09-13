@@ -7,7 +7,7 @@ use crate::client::{
     handle_diffie_hellman_two, handle_generate_keypair, handle_sign, pack_message,
     prep_cipher_from_secret, unpack_message,
 };
-use fennel_lib::{encrypt, export_public_key_to_binary, import_public_key_from_binary, verify};
+use fennel_lib::{encrypt, verify, FennelRSAPublicKey};
 use jsonrpsee::ws_server::{RpcModule, WsServerBuilder};
 use std::net::SocketAddr;
 
@@ -28,14 +28,15 @@ pub async fn start_rpc() -> anyhow::Result<()> {
 
     module.register_method("get_or_generate_keypair", |_, _| {
         let (_, _, public_key) = handle_generate_keypair();
-        let public_key_bytes = match export_public_key_to_binary(&public_key) {
+
+        let public_key_bytes = match FennelRSAPublicKey::new(public_key) {
             Ok(bytestring) => bytestring,
             Err(error) => panic!(
                 "Problem with exporting a public key to a bytestring: {}",
                 error
             ),
         };
-        Ok(hex::encode(public_key_bytes.to_vec()))
+        Ok(hex::encode(public_key_bytes.as_u8()))
     })?;
 
     module.register_method("generate_encryption_channel", |_, _| {
@@ -93,9 +94,8 @@ pub async fn start_rpc() -> anyhow::Result<()> {
         let public_key_bytes: Vec<u8> = hex::decode(params_struct.public_key_bytes).unwrap();
         let plaintext: Vec<u8> = params_struct.plaintext.into_bytes();
 
-        let public_key =
-            import_public_key_from_binary(&public_key_bytes.try_into().unwrap()).unwrap();
-        Ok(hex::encode(encrypt(public_key, plaintext)))
+        let public_key = FennelRSAPublicKey::from_u8(&public_key_bytes).unwrap();
+        Ok(hex::encode(encrypt(&public_key.pk, plaintext)))
     })?;
 
     module.register_method("decrypt", |params, _| {
@@ -135,9 +135,8 @@ pub async fn start_rpc() -> anyhow::Result<()> {
         let message: Vec<u8> = params_struct.message.into_bytes();
         let signature: Vec<u8> = params_struct.signature.into_bytes();
 
-        let public_key =
-            import_public_key_from_binary(&public_key_bytes.try_into().unwrap()).unwrap();
-        Ok(verify(public_key, message, signature))
+        let public_key = FennelRSAPublicKey::from_u8(&public_key_bytes).unwrap();
+        Ok(verify(&public_key.pk, message, signature))
     })?;
 
     module.register_method("whiteflag_encode", |params, _| {
