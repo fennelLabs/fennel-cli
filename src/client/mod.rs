@@ -222,7 +222,6 @@ pub fn handle_backlog_decrypt(
 ) {
     let message_list = retrieve_messages(message_db, identity);
     for message in message_list {
-        let sender_identity = retrieve_identity(Arc::clone(&identity_db), message.sender_id);
         let pub_key = FennelRSAPublicKey::from_u8(&message.public_key).unwrap();
         println!(
             "From: {:?} Verified: {:?}",
