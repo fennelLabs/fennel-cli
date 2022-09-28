@@ -1,1 +1,2 @@
-./scripts/build-test.sh
+#!/bin/bash
+cargo run -- start-rpc
