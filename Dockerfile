@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/vscode/devcontainers/rust:0-1
+FROM rust:1.64
 
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -y && \
@@ -9,11 +9,10 @@ RUN DEBIAN_FRONTEND=noninteractive \
     apt-get install clang libclang-dev libclang1 llvm llvm-dev clang-tools -y && \
     apt-get upgrade -y
 
-RUN rustup default stable
-RUN rustup update stable
-
 COPY . /app
 WORKDIR /app
+
+RUN cargo b
 
 EXPOSE 9030
 
