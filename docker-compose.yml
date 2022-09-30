@@ -1,11 +1,12 @@
 services:
-  dev:
+  fennel-cli:
+    image: isaacadams/fennel-cli:latest
     build: .
-    working_dir: /app
     volumes:
       - fennel-cli:/app
     entrypoint: cargo run -- start-rpc
     ports:
       - 9030:9030
+
 volumes:
   fennel-cli:
