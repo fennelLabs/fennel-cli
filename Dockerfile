@@ -15,6 +15,8 @@ RUN rustup update stable
 COPY . /app
 WORKDIR /app
 
+RUN cargo build
+
 EXPOSE 9030
 
 # start app
