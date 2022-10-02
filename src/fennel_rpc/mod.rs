@@ -20,7 +20,7 @@ use self::types::{
 #[allow(unreachable_code)]
 pub async fn start_rpc() -> anyhow::Result<()> {
     let server = WsServerBuilder::default()
-        .build("127.0.0.1:9030".parse::<SocketAddr>()?)
+        .build("0.0.0.0:9030".parse::<SocketAddr>()?)
         .await?;
 
     let mut module = RpcModule::new(());
