@@ -51,10 +51,8 @@ pub async fn start_rpc() -> anyhow::Result<()> {
         let json: String = params.parse()?;
         let params_struct: AcceptEncryptionChannelPacket =
             serde_json::from_str(&json).expect("JSON was misformatted.");
-        let shared_secret = handle_diffie_hellman_two(
-            params_struct.secret.to_string(),
-            params_struct.public,
-        );
+        let shared_secret =
+            handle_diffie_hellman_two(params_struct.secret.to_string(), params_struct.public);
         Ok(AcceptEncryptionChannelResponse {
             shared_secret: hex::encode(shared_secret.to_bytes()),
         })
@@ -120,8 +118,7 @@ pub async fn start_rpc() -> anyhow::Result<()> {
 
         let (_, private_key, _) = handle_generate_keypair();
         Ok(hex::encode(
-            handle_sign(&String::from_utf8_lossy(message), private_key)
-                .as_bytes()
+            handle_sign(&String::from_utf8_lossy(message), private_key).as_bytes(),
         ))
     })?;
 

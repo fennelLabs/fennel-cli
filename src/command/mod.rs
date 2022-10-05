@@ -36,7 +36,6 @@ pub enum Commands {
     //     message: String,
     //     recipient_id: u32,
     // },
-
     /// Encrypts a string with an AES secret
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     AESEncrypt {
@@ -83,7 +82,6 @@ pub enum Commands {
     // RetrieveIdentity { id: u32 },
     // #[clap()]
     // RetrieveIdentities {},
-
     /// Runs a WebSocket RPC exposing crypto functions to parallel applications
     #[clap()]
     StartRPC {},

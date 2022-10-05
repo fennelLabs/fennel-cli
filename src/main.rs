@@ -10,10 +10,11 @@ use client::{
 };
 use command::{Cli, Commands};
 use fennel_lib::{
-    get_identity_database_handle, get_message_database_handle, insert_identity, retrieve_identity, FennelRSAPublicKey,
+    get_identity_database_handle, get_message_database_handle, insert_identity, retrieve_identity,
+    FennelRSAPublicKey,
 };
 use rsa::RsaPublicKey;
-use std::{error::Error};
+use std::error::Error;
 
 use crate::client::{handle_aes_decrypt, prep_cipher};
 use crate::fennel_rpc::start_rpc;
@@ -89,7 +90,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         //     let listener: TcpStream = TcpStream::connect("127.0.0.1:7878").await?;
         //     handle_connection(identity_db_2, message_db, listener, packet).await?
         // }
-
         Commands::AESEncrypt {
             secret,
             public_key,
@@ -203,7 +203,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         //     drop(message_db);
         //     retrieve_identities().await.unwrap();
         // }
-
         Commands::StartRPC {} => {
             println!("Starting RPC on localhost:9030");
             start_rpc().await?;
