@@ -24,12 +24,12 @@ pub enum Commands {
         public_key: String,
     },
 
-    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    SendSecureMessage {
-        sender_id: u32,
-        message: String,
-        recipient_id: u32,
-    },
+    // #[clap(setting(AppSettings::ArgRequiredElseHelp))]
+    // SendSecureMessage {
+    //     sender_id: u32,
+    //     message: String,
+    //     recipient_id: u32,
+    // },
 
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     AESEncrypt {
@@ -53,24 +53,24 @@ pub enum Commands {
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     Sign { message: String },
 
-    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    DecryptBacklog { identity: u32 },
+    // #[clap(setting(AppSettings::ArgRequiredElseHelp))]
+    // DecryptBacklog { identity: u32 },
 
-    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    SendMessage {
-        sender_id: u32,
-        message: String,
-        recipient_id: u32,
-    },
-    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    GetMessages { id: u32 },
+    // #[clap(setting(AppSettings::ArgRequiredElseHelp))]
+    // SendMessage {
+    //     sender_id: u32,
+    //     message: String,
+    //     recipient_id: u32,
+    // },
+    // #[clap(setting(AppSettings::ArgRequiredElseHelp))]
+    // GetMessages { id: u32 },
 
-    #[clap()]
-    CreateIdentity {},
-    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    RetrieveIdentity { id: u32 },
-    #[clap()]
-    RetrieveIdentities {},
+    // #[clap()]
+    // CreateIdentity {},
+    // #[clap(setting(AppSettings::ArgRequiredElseHelp))]
+    // RetrieveIdentity { id: u32 },
+    // #[clap()]
+    // RetrieveIdentities {},
 
     #[clap()]
     StartRPC {},

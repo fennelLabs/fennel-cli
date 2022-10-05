@@ -53,7 +53,7 @@ pub async fn start_rpc() -> anyhow::Result<()> {
             serde_json::from_str(&json).expect("JSON was misformatted.");
         let shared_secret = handle_diffie_hellman_two(
             params_struct.secret.to_string(),
-            params_struct.public.to_string(),
+            params_struct.public,
         );
         Ok(AcceptEncryptionChannelResponse {
             shared_secret: hex::encode(shared_secret.to_bytes()),
@@ -69,7 +69,7 @@ pub async fn start_rpc() -> anyhow::Result<()> {
             .try_into()
             .expect("Unable to match shared secret to a length of 32 bytes.");
         let cipher = prep_cipher_from_secret(&shared_secret);
-        let ciphertext = handle_aes_encrypt(cipher, params_struct.plaintext.to_string());
+        let ciphertext = handle_aes_encrypt(cipher, params_struct.plaintext);
         Ok(hex::encode(pack_message(ciphertext)))
     })?;
 
@@ -107,7 +107,7 @@ pub async fn start_rpc() -> anyhow::Result<()> {
 
         let (_, private_key, _) = handle_generate_keypair();
         Ok(hex::encode(
-            handle_decrypt(ciphertext, &private_key).as_bytes().to_vec(),
+            handle_decrypt(ciphertext, &private_key).as_bytes(),
         ))
     })?;
 
@@ -120,9 +120,8 @@ pub async fn start_rpc() -> anyhow::Result<()> {
 
         let (_, private_key, _) = handle_generate_keypair();
         Ok(hex::encode(
-            handle_sign(&String::from_utf8_lossy(&message), private_key)
+            handle_sign(&String::from_utf8_lossy(message), private_key)
                 .as_bytes()
-                .to_vec(),
         ))
     })?;
 

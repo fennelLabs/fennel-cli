@@ -23,6 +23,7 @@ use tokio::{io::*, net::TcpStream};
 use x25519_dalek::{PublicKey, SharedSecret, StaticSecret};
 
 /// Given the current CLI context, this procedure handles top-level networking and branching.
+#[allow(dead_code)]
 pub async fn handle_connection(
     identity_db: Arc<Mutex<DB>>,
     message_db: Arc<Mutex<DB>>,
@@ -121,6 +122,7 @@ pub async fn handle_connection(
     Ok(())
 }
 
+#[allow(dead_code)]
 pub async fn retrieve_identities() -> Result<()> {
     let txn: TransactionHandler = futures::executor::block_on(TransactionHandler::new()).unwrap();
     txn.fetch_identities().await.expect("connection failed");
@@ -214,6 +216,7 @@ fn insert_message_list(messages_db: Arc<Mutex<DB>>, messages_list: Vec<Message>)
 }
 
 /// Decrypts, verifies, and displays all messages received by the current user.
+#[allow(dead_code)]
 pub fn handle_backlog_decrypt(
     message_db: Arc<Mutex<DB>>,
     identity_db: Arc<Mutex<DB>>,
@@ -360,6 +363,7 @@ pub fn handle_diffie_hellman_two(secret: String, public_key: String) -> SharedSe
 }
 
 /// Given an identity with a known shared secret, execute Diffie-Hellman encryption.
+#[allow(dead_code)]
 pub fn handle_diffie_hellman_encrypt(
     db_lock: Arc<Mutex<DB>>,
     identity: &u32,
@@ -373,6 +377,7 @@ pub fn handle_diffie_hellman_encrypt(
 }
 
 /// Given an identity with a known shared secret, execute Diffie-Hellman decryption.
+#[allow(dead_code)]
 pub fn handle_diffie_hellman_decrypt(
     db_lock: Arc<Mutex<DB>>,
     identity: [u8; 4],
