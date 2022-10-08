@@ -60,17 +60,4 @@ pub enum Commands {
     /// Runs a WebSocket RPC exposing crypto functions to parallel applications
     #[clap()]
     StartRPC {},
-
-    /* Whiteflag */
-    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    Encode { json: String },
-
-    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    Decode { hex: String },
-
-    #[clap()]
-    Auth { logout: bool },
-
-    #[clap()]
-    Message { code: String },
 }

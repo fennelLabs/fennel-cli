@@ -11,6 +11,10 @@ path = "src/main.rs"
 name = "fennel-ipfs"
 path = "src/ipfs/main.rs"
 
+[[bin]]
+name = "fennel-wf"
+path = "src/wf/main.rs"
+
 [dependencies]
 clap = { version = "3.0.10", features = ["derive"] }
 
