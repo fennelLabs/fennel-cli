@@ -6,7 +6,9 @@ use std::fs;
 use clap::Parser;
 use command::{Cli, Commands};
 
-use fennel_lib::{add_content_by_local_path, add_content_by_string, delete_content_by_cid, get_content_by_cid};
+use fennel_lib::{
+    add_content_by_local_path, add_content_by_string, delete_content_by_cid, get_content_by_cid,
+};
 
 pub fn main() {
     let args = Cli::parse();
