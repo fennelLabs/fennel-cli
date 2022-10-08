@@ -305,14 +305,11 @@ pub fn handle_sign(message: &str, private_key: rsa::RsaPrivateKey) -> String {
 
 /// Verifies a signature based on the identity it claims to be from.
 pub fn handle_verify(
-    db_lock: Arc<Mutex<DB>>,
     message: &str,
     signature: &str,
-    identity: &u32,
+    public_key: &str,
 ) -> bool {
-    let id_array = identity.to_ne_bytes();
-    let recipient = retrieve_identity(db_lock, id_array);
-    let pub_key = FennelRSAPublicKey::from_u8(&recipient.public_key).unwrap();
+    let pub_key = FennelRSAPublicKey::from_u8(&hex::decode(public_key).unwrap()).unwrap();
     verify(
         &pub_key.pk,
         message.as_bytes().to_vec(),

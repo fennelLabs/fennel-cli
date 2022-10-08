@@ -44,22 +44,12 @@ fn test_handle_encrypt_and_decrypt() {
 
 #[test]
 fn test_handle_sign_and_verify() {
-    let db = get_identity_database_handle();
-    let db_2 = Arc::clone(&db);
     let (_, private_key, public_key) = handle_generate_keypair();
     let key_bytes = convert_rsa(public_key);
 
-    let identity: Identity = Identity {
-        id: [0; 4],
-        fingerprint: [0; 16],
-        public_key: key_bytes,
-        shared_secret_key: [0; 32],
-    };
-    insert_identity(db, &identity).expect("failed identity insertion");
-
     let signature = handle_sign(&String::from("Test"), private_key);
     assert_eq!(
-        handle_verify(db_2, &String::from("Test"), &signature, &0),
+        handle_verify(&String::from("Test"), &signature, &hex::encode(key_bytes)),
         true
     )
 }

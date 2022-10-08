@@ -30,12 +30,6 @@ pub enum Commands {
         public_key: String,
     },
 
-    // #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    // SendSecureMessage {
-    //     sender_id: u32,
-    //     message: String,
-    //     recipient_id: u32,
-    // },
     /// Encrypts a string with an AES secret
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     AESEncrypt {
@@ -52,36 +46,22 @@ pub enum Commands {
         ciphertext: String,
     },
 
+    /// Print out the current session public key
+    #[clap()]
+    ShowPublicKey {},
+
     /// Verifies a message given a signature for an identity
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     Verify {
         message: String,
         signature: String,
-        identity: u32,
+        public_key: String,
     },
 
     /// RSA signs the given message
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     Sign { message: String },
 
-    // #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    // DecryptBacklog { identity: u32 },
-
-    // #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    // SendMessage {
-    //     sender_id: u32,
-    //     message: String,
-    //     recipient_id: u32,
-    // },
-    // #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    // GetMessages { id: u32 },
-
-    // #[clap()]
-    // CreateIdentity {},
-    // #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    // RetrieveIdentity { id: u32 },
-    // #[clap()]
-    // RetrieveIdentities {},
     /// Runs a WebSocket RPC exposing crypto functions to parallel applications
     #[clap()]
     StartRPC {},
