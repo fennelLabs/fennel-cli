@@ -4,7 +4,7 @@ use std::panic;
 
 use crate::client::{
     handle_aes_decrypt, handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one,
-    handle_diffie_hellman_two, handle_generate_keypair, handle_sign, pack_message,
+    handle_generate_keypair, handle_sign, pack_message, parse_shared_secret,
     prep_cipher_from_secret, unpack_message,
 };
 use fennel_lib::{encrypt, verify, FennelRSAPublicKey};
@@ -52,7 +52,7 @@ pub async fn start_rpc() -> anyhow::Result<()> {
         let params_struct: AcceptEncryptionChannelPacket =
             serde_json::from_str(&json).expect("JSON was misformatted.");
         let shared_secret =
-            handle_diffie_hellman_two(params_struct.secret.to_string(), params_struct.public);
+            parse_shared_secret(params_struct.secret.to_string(), params_struct.public);
         Ok(AcceptEncryptionChannelResponse {
             shared_secret: hex::encode(shared_secret.to_bytes()),
         })

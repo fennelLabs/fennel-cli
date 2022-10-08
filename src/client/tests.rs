@@ -8,35 +8,24 @@ use fennel_lib::{
 use crate::{
     client::{
         handle_diffie_hellman_decrypt, handle_diffie_hellman_encrypt, handle_sign, handle_verify,
-        prep_cipher,
+        parse_shared_secret, prep_cipher,
     },
     convert_rsa,
 };
 
 use super::{
     handle_aes_decrypt, handle_aes_encrypt, handle_backlog_decrypt, handle_decrypt,
-    handle_diffie_hellman_one, handle_diffie_hellman_two, handle_encrypt, handle_generate_keypair,
-    pack_message, unpack_message,
+    handle_diffie_hellman_one, handle_encrypt, handle_generate_keypair, pack_message,
+    unpack_message,
 };
 
 #[test]
 /// Tests the processes for generating keys, encrypting text, and decrypting the resulting ciphertext.
 fn test_handle_encrypt_and_decrypt() {
-    let db = get_identity_database_handle();
-    let db_2 = Arc::clone(&db);
-
     let (_, private_key, public_key) = handle_generate_keypair();
     let key_bytes = convert_rsa(public_key);
 
-    let identity: Identity = Identity {
-        id: [0; 4],
-        fingerprint: [0; 16],
-        public_key: key_bytes,
-        shared_secret_key: [0; 32],
-    };
-    insert_identity(db, &identity).expect("failed identity insertion");
-
-    let result = handle_encrypt(db_2, &0, &String::from("test"));
+    let result = handle_encrypt(&hex::encode(key_bytes), &String::from("test"));
     let decrypted = handle_decrypt(result, &private_key);
 
     assert_eq!(String::from("test"), decrypted);
@@ -60,7 +49,6 @@ fn test_handle_backlog_decrypt() {
     let identity_db_clone = Arc::clone(&identity_db);
     let identity_db_2 = Arc::clone(&identity_db);
     let identity_db_3 = Arc::clone(&identity_db);
-    let identity_db_4 = Arc::clone(&identity_db);
     let message_db = get_message_database_handle();
     let message_db_clone = Arc::clone(&message_db);
     let message_db_2 = Arc::clone(&message_db);
@@ -80,12 +68,12 @@ fn test_handle_backlog_decrypt() {
 
     insert_identity(identity_db_clone, &identity).expect("failed to insert identity");
 
-    let ciphertext_verify = handle_encrypt(identity_db, &9, &String::from("This is a test"));
+    let ciphertext_verify = handle_encrypt(&hex::encode(pk_526), &String::from("This is a test"));
     assert_eq!(
         handle_decrypt(ciphertext_verify, &private_key),
         String::from("This is a test")
     );
-    let ciphertext = handle_encrypt(identity_db_4, &9, &String::from("This is a test"));
+    let ciphertext = handle_encrypt(&hex::encode(pk_526), &String::from("This is a test"));
     let ciphertext_array = ciphertext.to_owned();
     let ciphertext_sign = ciphertext.to_owned();
 
@@ -136,8 +124,8 @@ fn test_diffie_hellman() {
     let (secret_key, public_key) = handle_diffie_hellman_one();
     let secret = hex::encode(secret_key.to_bytes());
     let public = hex::encode(public_key.to_bytes());
-    let shared1 = handle_diffie_hellman_two(secret.clone(), public.clone());
-    let shared2 = handle_diffie_hellman_two(secret.clone(), public.clone());
+    let shared1 = parse_shared_secret(secret.clone(), public.clone());
+    let shared2 = parse_shared_secret(secret.clone(), public.clone());
     assert_eq!(shared1.as_bytes(), shared2.as_bytes());
 
     let cipher = prep_cipher(secret.clone(), public.clone());
@@ -164,7 +152,7 @@ fn test_handle_backlog_decrypt_with_dh() {
     let (secret_key, public_key) = handle_diffie_hellman_one();
     let secret = hex::encode(secret_key.to_bytes());
     let public = hex::encode(public_key.to_bytes());
-    let shared1 = handle_diffie_hellman_two(secret.clone(), public.clone());
+    let shared1 = parse_shared_secret(secret.clone(), public.clone());
 
     let (fingerprint, private_key, public_key) = handle_generate_keypair();
     let (_, private_key_loaded, public_key_loaded) = handle_generate_keypair();

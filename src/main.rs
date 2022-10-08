@@ -5,14 +5,11 @@ mod command;
 mod fennel_rpc;
 use clap::Parser;
 use client::{
-    handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one, handle_diffie_hellman_two,
-    handle_encrypt, handle_generate_keypair, handle_sign, handle_verify,
+    handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one, handle_encrypt,
+    handle_generate_keypair, handle_sign, handle_verify,
 };
 use command::{Cli, Commands};
-use fennel_lib::{
-    get_identity_database_handle, get_message_database_handle, insert_identity, retrieve_identity,
-    FennelRSAPublicKey,
-};
+use fennel_lib::FennelRSAPublicKey;
 use rsa::RsaPublicKey;
 use std::error::Error;
 
@@ -23,22 +20,15 @@ use crate::fennel_rpc::start_rpc;
 async fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::parse();
 
-    let identity_db = get_identity_database_handle();
-    let _message_db = get_message_database_handle();
-
     let (_fingerprint, private_key, public_key) = handle_generate_keypair();
     let pk = FennelRSAPublicKey::new(public_key).unwrap();
-    let _pk_sized: [u8; 526] = convert_to_sized_array(pk.as_u8().to_vec());
 
     match &args.command {
         Commands::Encrypt {
-            identity,
+            public_key,
             plaintext,
         } => {
-            println!(
-                "{}",
-                hex::encode(handle_encrypt(identity_db, identity, plaintext))
-            );
+            println!("{}", hex::encode(handle_encrypt(public_key, plaintext)));
         }
         Commands::Decrypt { ciphertext } => {
             println!(
@@ -57,18 +47,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 "Public key (SHARE THIS): {}",
                 hex::encode(public.as_bytes())
             );
-        }
-        Commands::AcceptEncryptionChannel {
-            identity_id,
-            secret_key,
-            public_key,
-        } => {
-            let shared_secret =
-                handle_diffie_hellman_two(secret_key.to_string(), public_key.to_string());
-            let mut identity = retrieve_identity(identity_db.clone(), identity_id.to_ne_bytes());
-            identity.shared_secret_key = shared_secret.to_bytes();
-            insert_identity(identity_db, &identity).unwrap();
-            println!("Encryption channel ready");
         }
         Commands::AESEncrypt {
             secret,

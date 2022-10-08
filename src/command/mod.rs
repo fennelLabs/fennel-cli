@@ -12,23 +12,18 @@ pub struct Cli {
 pub enum Commands {
     /// RSA encrypts a given string with a known public key for the given identity.
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    Encrypt { plaintext: String, identity: u32 },
+    Encrypt {
+        plaintext: String,
+        public_key: String,
+    },
 
     /// RSA decrypts ciphertext encrypted for the current private key
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     Decrypt { ciphertext: String },
 
     /// Begins a Diffie-Hellman handshake
-    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
+    #[clap()]
     GenerateEncryptionChannel {},
-
-    /// Finishes a Diffie-Hellman handshake
-    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    AcceptEncryptionChannel {
-        identity_id: u32,
-        secret_key: String,
-        public_key: String,
-    },
 
     /// Encrypts a string with an AES secret
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
