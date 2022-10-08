@@ -17,13 +17,13 @@ Run `wf help` to get a list of all the commands available to you. In the followi
 #### Encode
 
 ```
-cargo run -- encode "{\"prefix\":\"WF\",\"version\":\"1\",\"encryptionIndicator\":\"0\",\"duressIndicator\":\"0\",\"messageCode\":\"A\",\"referenceIndicator\":\"0\",\"referencedMessage\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"verificationMethod\":\"1\",\"verificationData\":\"https://organisation.int/whiteflag\"}"
+cargo wf encode "{\"prefix\":\"WF\",\"version\":\"1\",\"encryptionIndicator\":\"0\",\"duressIndicator\":\"0\",\"messageCode\":\"A\",\"referenceIndicator\":\"0\",\"referencedMessage\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"verificationMethod\":\"1\",\"verificationData\":\"https://organisation.int/whiteflag\"}"
 ```
 
 #### Decode
 
 ```
-cargo run -- decode 5746313020800000000000000000000000000000000000000000000000000000000000000000b43a3a38399d1797b7b933b0b734b9b0ba34b7b71734b73a17bbb434ba32b33630b380
+cargo wf decode 5746313020800000000000000000000000000000000000000000000000000000000000000000b43a3a38399d1797b7b933b0b734b9b0ba34b7b71734b73a17bbb434ba32b33630b380
 ```
 
 #### Auth
@@ -31,13 +31,13 @@ cargo run -- decode 574631302080000000000000000000000000000000000000000000000000
 Create an authentication session
 
 ```
-cargo run -- auth
+cargo wf auth
 ```
 
 Logout from your active authentication session
 
 ```
-cargo run -- auth logout
+cargo wf auth logout
 ```
 
 #### Message
@@ -47,7 +47,7 @@ This command allows a user to send a whiteflag message onto the blockchain.
 NOTE: an active authentication session is required before using this command. Create one using `wf auth`.
 
 ```
-cargo run -- message A
+cargo wf message A
 ```
 
 Supported Message Codes:
