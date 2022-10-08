@@ -5,8 +5,8 @@ mod command;
 mod fennel_rpc;
 use clap::Parser;
 use client::{
-    handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one,
-    handle_encrypt, handle_generate_keypair, handle_sign, handle_verify,
+    handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one, handle_encrypt,
+    handle_generate_keypair, handle_sign, handle_verify,
 };
 use command::{Cli, Commands};
 use fennel_lib::FennelRSAPublicKey;
@@ -28,10 +28,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             public_key,
             plaintext,
         } => {
-            println!(
-                "{}",
-                hex::encode(handle_encrypt(public_key, plaintext))
-            );
+            println!("{}", hex::encode(handle_encrypt(public_key, plaintext)));
         }
         Commands::Decrypt { ciphertext } => {
             println!(

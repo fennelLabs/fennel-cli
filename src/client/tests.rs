@@ -8,15 +8,15 @@ use fennel_lib::{
 use crate::{
     client::{
         handle_diffie_hellman_decrypt, handle_diffie_hellman_encrypt, handle_sign, handle_verify,
-        prep_cipher, parse_shared_secret,
+        parse_shared_secret, prep_cipher,
     },
     convert_rsa,
 };
 
 use super::{
     handle_aes_decrypt, handle_aes_encrypt, handle_backlog_decrypt, handle_decrypt,
-    handle_diffie_hellman_one, handle_encrypt, handle_generate_keypair,
-    pack_message, unpack_message,
+    handle_diffie_hellman_one, handle_encrypt, handle_generate_keypair, pack_message,
+    unpack_message,
 };
 
 #[test]

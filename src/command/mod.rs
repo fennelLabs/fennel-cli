@@ -12,7 +12,10 @@ pub struct Cli {
 pub enum Commands {
     /// RSA encrypts a given string with a known public key for the given identity.
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    Encrypt { plaintext: String, public_key: String },
+    Encrypt {
+        plaintext: String,
+        public_key: String,
+    },
 
     /// RSA decrypts ciphertext encrypted for the current private key
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]

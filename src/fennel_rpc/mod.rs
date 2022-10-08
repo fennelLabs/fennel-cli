@@ -4,8 +4,8 @@ use std::panic;
 
 use crate::client::{
     handle_aes_decrypt, handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one,
-    handle_generate_keypair, handle_sign, pack_message,
-    prep_cipher_from_secret, unpack_message, parse_shared_secret,
+    handle_generate_keypair, handle_sign, pack_message, parse_shared_secret,
+    prep_cipher_from_secret, unpack_message,
 };
 use fennel_lib::{encrypt, verify, FennelRSAPublicKey};
 use jsonrpsee::ws_server::{RpcModule, WsServerBuilder};
