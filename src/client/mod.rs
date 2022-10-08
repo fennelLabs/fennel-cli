@@ -285,10 +285,8 @@ pub fn handle_generate_keypair() -> ([u8; 16], rsa::RsaPrivateKey, rsa::RsaPubli
 }
 
 /// Handles RSA encryption.
-pub fn handle_encrypt(db_lock: Arc<Mutex<DB>>, identity: &u32, plaintext: &str) -> Vec<u8> {
-    let id_array = identity.to_ne_bytes();
-    let recipient = retrieve_identity(db_lock, id_array);
-    let pub_key = FennelRSAPublicKey::from_u8(&recipient.public_key).unwrap();
+pub fn handle_encrypt(public_key: &str, plaintext: &str) -> Vec<u8> {
+    let pub_key = FennelRSAPublicKey::from_u8(&hex::decode(public_key).unwrap()).unwrap();
     encrypt(&pub_key.pk, plaintext.as_bytes().to_vec())
 }
 
@@ -314,7 +312,7 @@ pub fn handle_verify(message: &str, signature: &str, public_key: &str) -> bool {
 }
 
 /// Execute shared secret derivation given Diffie-Hellman factors.
-fn parse_shared_secret(secret: String, public_key: String) -> SharedSecret {
+pub fn parse_shared_secret(secret: String, public_key: String) -> SharedSecret {
     let secret_key_bytes: [u8; 32] = hex::decode(secret).unwrap().try_into().unwrap();
     let parsed_secret_key = StaticSecret::from(secret_key_bytes);
     let key_bytes: [u8; 32] = hex::decode(public_key).unwrap().try_into().unwrap();
@@ -348,11 +346,6 @@ pub fn handle_diffie_hellman_one() -> (StaticSecret, PublicKey) {
     let secret = get_session_secret();
     let public = get_session_public_key(&secret);
     (secret, public)
-}
-
-/// Creates a shared secret from Diffie-Hellman factors.
-pub fn handle_diffie_hellman_two(secret: String, public_key: String) -> SharedSecret {
-    parse_shared_secret(secret, public_key)
 }
 
 /// Given an identity with a known shared secret, execute Diffie-Hellman encryption.
