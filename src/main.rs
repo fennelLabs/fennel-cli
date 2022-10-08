@@ -207,6 +207,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
             println!("Starting RPC on localhost:9030");
             start_rpc().await?;
         }
+
+        Commands::Encode { json } => {
+            println!("{}", wf_cli::WhiteflagCLICommands::encode(json)?);
+        }
+        Commands::Decode { hex } => {
+            println!("{}", wf_cli::WhiteflagCLICommands::decode(hex)?);
+        }
+        Commands::Auth { logout } => {
+            println!("{}", wf_cli::WhiteflagCLICommands::auth(logout.clone())?);
+        }
+        Commands::Message { code } => {
+            let message = wf_cli::WhiteflagCLICommands::message(code.to_owned())?;
+            println!("{}", message);
+        }
     }
 
     Ok(())
