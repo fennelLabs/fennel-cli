@@ -962,7 +962,7 @@ dependencies = [
 [[package]]
 name = "fennel-whiteflag"
 version = "1.0.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#d062a8813de46511420b23e5b2b6d300ae3f26ba"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#8e77f5a59fe076f41e6f59c5179545037c46f92f"
 dependencies = [
  "aes_tools",
  "hex",
@@ -4327,9 +4327,9 @@ checksum = "099b7128301d285f79ddd55b9a83d5e6b9e97c92e0ea0daebee7263e932de992"
 
 [[package]]
 name = "unicode-ident"
-version = "1.0.4"
+version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dcc811dc4066ac62f84f11307873c4850cb653bfa9b1719cee2bd2204a4bc5dd"
+checksum = "6ceab39d59e4c9499d4e5a8ee0e2735b891bb7308ac83dfb4e80cad195c9f6f3"
 
 [[package]]
 name = "unicode-normalization"
@@ -4539,7 +4539,7 @@ dependencies = [
 [[package]]
 name = "wf_account"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#d062a8813de46511420b23e5b2b6d300ae3f26ba"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#8e77f5a59fe076f41e6f59c5179545037c46f92f"
 dependencies = [
  "wf_auth",
  "wf_crypto",
@@ -4549,7 +4549,7 @@ dependencies = [
 [[package]]
 name = "wf_auth"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#d062a8813de46511420b23e5b2b6d300ae3f26ba"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#8e77f5a59fe076f41e6f59c5179545037c46f92f"
 dependencies = [
  "wf_crypto",
 ]
@@ -4557,7 +4557,7 @@ dependencies = [
 [[package]]
 name = "wf_buffer"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#d062a8813de46511420b23e5b2b6d300ae3f26ba"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#8e77f5a59fe076f41e6f59c5179545037c46f92f"
 dependencies = [
  "hex",
  "wf_codec",
@@ -4568,7 +4568,7 @@ dependencies = [
 [[package]]
 name = "wf_cli"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#d062a8813de46511420b23e5b2b6d300ae3f26ba"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#8e77f5a59fe076f41e6f59c5179545037c46f92f"
 dependencies = [
  "clap",
  "fennel-whiteflag",
@@ -4581,7 +4581,7 @@ dependencies = [
 [[package]]
 name = "wf_codec"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#d062a8813de46511420b23e5b2b6d300ae3f26ba"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#8e77f5a59fe076f41e6f59c5179545037c46f92f"
 dependencies = [
  "hex",
  "lazy_static",
@@ -4594,7 +4594,7 @@ dependencies = [
 [[package]]
 name = "wf_common"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#d062a8813de46511420b23e5b2b6d300ae3f26ba"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#8e77f5a59fe076f41e6f59c5179545037c46f92f"
 dependencies = [
  "regex",
 ]
@@ -4602,7 +4602,7 @@ dependencies = [
 [[package]]
 name = "wf_crypto"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#d062a8813de46511420b23e5b2b6d300ae3f26ba"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#8e77f5a59fe076f41e6f59c5179545037c46f92f"
 dependencies = [
  "aes_tools",
  "dh_tools",
@@ -4616,7 +4616,7 @@ dependencies = [
 [[package]]
 name = "wf_field"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#d062a8813de46511420b23e5b2b6d300ae3f26ba"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#8e77f5a59fe076f41e6f59c5179545037c46f92f"
 dependencies = [
  "count-macro",
  "hex",
@@ -4634,7 +4634,7 @@ dependencies = [
 [[package]]
 name = "wf_parser"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#d062a8813de46511420b23e5b2b6d300ae3f26ba"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#8e77f5a59fe076f41e6f59c5179545037c46f92f"
 dependencies = [
  "wf_buffer",
  "wf_field",
@@ -4643,7 +4643,7 @@ dependencies = [
 [[package]]
 name = "wf_validation"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#d062a8813de46511420b23e5b2b6d300ae3f26ba"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#8e77f5a59fe076f41e6f59c5179545037c46f92f"
 dependencies = [
  "thiserror",
 ]

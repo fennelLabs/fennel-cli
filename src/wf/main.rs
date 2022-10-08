@@ -20,7 +20,9 @@ pub fn main() {
         }
         Commands::Message { code } => {
             let message = wf_cli::WhiteflagCLICommands::message(code.to_owned()).unwrap();
-            println!("{}", message);
+            let hex = message.as_hex().unwrap();
+            let cid = fennel_lib::add_content_by_string(&hex).unwrap();
+            println!("hex: {}\ncid: {}", hex, cid);
         }
     }
 }
