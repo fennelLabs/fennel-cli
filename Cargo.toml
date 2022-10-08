@@ -3,6 +3,14 @@ name = "fennel-cli"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "fennel-cli"
+path = "src/main.rs"
+
+[[bin]]
+name = "fennel-ipfs"
+path = "src/ipfs/main.rs"
+
 [dependencies]
 clap = { version = "3.0.10", features = ["derive"] }
 
