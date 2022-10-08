@@ -95,7 +95,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         Commands::ShowPublicKey {} => {
             println!("{}", hex::encode(pk.as_u8()));
-        },
+        }
 
         Commands::Sign { message } => println!("{}", handle_sign(message, private_key)),
         Commands::Verify {

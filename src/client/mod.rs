@@ -304,11 +304,7 @@ pub fn handle_sign(message: &str, private_key: rsa::RsaPrivateKey) -> String {
 }
 
 /// Verifies a signature based on the identity it claims to be from.
-pub fn handle_verify(
-    message: &str,
-    signature: &str,
-    public_key: &str,
-) -> bool {
+pub fn handle_verify(message: &str, signature: &str, public_key: &str) -> bool {
     let pub_key = FennelRSAPublicKey::from_u8(&hex::decode(public_key).unwrap()).unwrap();
     verify(
         &pub_key.pk,
