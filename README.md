@@ -8,14 +8,20 @@ $ cargo run
 $ target/debug/fennel-cli help
 ```
 
-To run the local cryptography RPC, run
+To run the included testing suite, run:
+```bash
+$ ./scripts/setup.sh
+$ ./scripts/build-test.sh
+```
+
+To run the local cryptography/Whiteflag RPC, run
 
 ```bash
 $ ./scripts/setup.sh
 $ cargo run --bin fennel-cli -- start-rpc
 ```
 
-To interact with IPFS:
+## To interact with a locally-running IPFS node
 
 **Add file**
 ```bash
