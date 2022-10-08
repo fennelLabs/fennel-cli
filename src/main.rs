@@ -11,7 +11,7 @@ use client::{
 use command::{Cli, Commands};
 use fennel_lib::{
     get_identity_database_handle, get_message_database_handle, insert_identity, retrieve_identity,
-    FennelRSAPublicKey
+    FennelRSAPublicKey,
 };
 use rsa::RsaPublicKey;
 use std::error::Error;
@@ -206,7 +206,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         Commands::StartRPC {} => {
             println!("Starting RPC on localhost:9030");
             start_rpc().await?;
-        },
+        }
     }
 
     Ok(())

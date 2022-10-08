@@ -12,19 +12,13 @@ pub struct Cli {
 pub enum Commands {
     /// Adds a file to IPFS as a block
     #[clap()]
-    AddFile {
-        filename: String,
-    },
+    AddFile { filename: String },
 
     /// Retrieves a block from IPFS by CID
     #[clap()]
-    GetFile {
-        cid: String,
-    },
+    GetFile { cid: String },
 
     /// Deletes a block from IPFS by CID
     #[clap()]
-    DeleteFile {
-        cid: String,
-    }
+    DeleteFile { cid: String },
 }
