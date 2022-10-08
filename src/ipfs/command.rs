@@ -10,6 +10,10 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
+    /// Add a given string to IPFS as a block
+    #[clap()]
+    AddString { file_content: String },
+
     /// Adds a file to IPFS as a block
     #[clap()]
     AddFile { filename: String },
