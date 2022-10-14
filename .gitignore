@@ -8,3 +8,5 @@ venv/
 /target
 identity.db/
 message.db/
+.authlock
+upload.txt

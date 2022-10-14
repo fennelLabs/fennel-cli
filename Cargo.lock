@@ -962,7 +962,7 @@ dependencies = [
 [[package]]
 name = "fennel-whiteflag"
 version = "1.0.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#614a5714be99b8bede9c9abe391a7f9607c966eb"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#0e82c044d92464990403bb67f791c873ceeab6f9"
 dependencies = [
  "aes_tools",
  "hex",
@@ -1392,7 +1392,7 @@ checksum = "75f43d41e26995c17e71ee126451dd3941010b0514a81a9d11f3b341debc2399"
 dependencies = [
  "bytes",
  "fnv",
- "itoa 1.0.4",
+ "itoa",
 ]
 
 [[package]]
@@ -1439,7 +1439,7 @@ dependencies = [
  "http-body",
  "httparse",
  "httpdate",
- "itoa 1.0.4",
+ "itoa",
  "pin-project-lite",
  "socket2",
  "tokio",
@@ -1579,12 +1579,6 @@ name = "ipnet"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "879d54834c8c76457ef4293a689b2a8c59b076067ad77b15efafbb05f92a592b"
-
-[[package]]
-name = "itoa"
-version = "0.4.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b71991ff56294aa922b450139ee08b3bfc70982c6b2c7562771375cf73542dd4"
 
 [[package]]
 name = "itoa"
@@ -1875,9 +1869,9 @@ checksum = "830d08ce1d1d941e6b30645f1a0eb5643013d835ce3779a5fc208261dbe10f55"
 
 [[package]]
 name = "libc"
-version = "0.2.134"
+version = "0.2.135"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "329c933548736bc49fd575ee68c89e8be4d260064184389a5b77517cddd99ffb"
+checksum = "68783febc7782c6c5cb401fbda4de5a9898be1762314da0bb2c10ced61f18b0c"
 
 [[package]]
 name = "libloading"
@@ -2158,12 +2152,12 @@ dependencies = [
 
 [[package]]
 name = "num-format"
-version = "0.4.0"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bafe4179722c2894288ee77a9f044f02811c86af699344c498b0840c698a2465"
+checksum = "54b862ff8df690cf089058c98b183676a7ed0f974cc08b426800093227cbff3b"
 dependencies = [
- "arrayvec 0.4.12",
- "itoa 0.4.8",
+ "arrayvec 0.7.2",
+ "itoa",
 ]
 
 [[package]]
@@ -2698,18 +2692,18 @@ dependencies = [
 
 [[package]]
 name = "ref-cast"
-version = "1.0.9"
+version = "1.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed13bcd201494ab44900a96490291651d200730904221832b9547d24a87d332b"
+checksum = "12a733f1746c929b4913fe48f8697fcf9c55e3304ba251a79ffb41adfeaf49c2"
 dependencies = [
  "ref-cast-impl",
 ]
 
 [[package]]
 name = "ref-cast-impl"
-version = "1.0.9"
+version = "1.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5234cd6063258a5e32903b53b1b6ac043a0541c8adc1f610f67b0326c7a578fa"
+checksum = "5887de4a01acafd221861463be6113e6e87275e79804e56779f4cdc131c60368"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3049,11 +3043,11 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.85"
+version = "1.0.86"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e55a28e3aaef9d5ce0506d0a14dbba8054ddc7e499ef522dd8b26859ec9d4a44"
+checksum = "41feea4228a6f1cd09ec7a3593a682276702cd67b5273544757dae23c096f074"
 dependencies = [
- "itoa 1.0.4",
+ "itoa",
  "ryu",
  "serde",
 ]
@@ -3065,7 +3059,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3491c14715ca2294c4d6a88f15e84739788c1d030eed8c110436aafdaa2f3fd"
 dependencies = [
  "form_urlencoded",
- "itoa 1.0.4",
+ "itoa",
  "ryu",
  "serde",
 ]
@@ -3796,9 +3790,9 @@ dependencies = [
 
 [[package]]
 name = "ss58-registry"
-version = "1.31.0"
+version = "1.33.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1de151faef619cb7b5c26b32d42bc7ddccac0d202beb7a84344b44e9232b92f7"
+checksum = "3ab7554f8a8b6f8d71cd5a8e6536ef116e2ce0504cf97ebf16311d58065dc8a6"
 dependencies = [
  "Inflector",
  "num-format",
@@ -4539,7 +4533,7 @@ dependencies = [
 [[package]]
 name = "wf_account"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#614a5714be99b8bede9c9abe391a7f9607c966eb"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#0e82c044d92464990403bb67f791c873ceeab6f9"
 dependencies = [
  "wf_auth",
  "wf_crypto",
@@ -4549,7 +4543,7 @@ dependencies = [
 [[package]]
 name = "wf_auth"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#614a5714be99b8bede9c9abe391a7f9607c966eb"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#0e82c044d92464990403bb67f791c873ceeab6f9"
 dependencies = [
  "wf_crypto",
 ]
@@ -4557,7 +4551,7 @@ dependencies = [
 [[package]]
 name = "wf_buffer"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#614a5714be99b8bede9c9abe391a7f9607c966eb"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#0e82c044d92464990403bb67f791c873ceeab6f9"
 dependencies = [
  "hex",
  "wf_codec",
@@ -4568,7 +4562,7 @@ dependencies = [
 [[package]]
 name = "wf_cli"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#614a5714be99b8bede9c9abe391a7f9607c966eb"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#0e82c044d92464990403bb67f791c873ceeab6f9"
 dependencies = [
  "clap",
  "fennel-whiteflag",
@@ -4581,7 +4575,7 @@ dependencies = [
 [[package]]
 name = "wf_codec"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#614a5714be99b8bede9c9abe391a7f9607c966eb"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#0e82c044d92464990403bb67f791c873ceeab6f9"
 dependencies = [
  "hex",
  "lazy_static",
@@ -4594,7 +4588,7 @@ dependencies = [
 [[package]]
 name = "wf_common"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#614a5714be99b8bede9c9abe391a7f9607c966eb"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#0e82c044d92464990403bb67f791c873ceeab6f9"
 dependencies = [
  "regex",
 ]
@@ -4602,7 +4596,7 @@ dependencies = [
 [[package]]
 name = "wf_crypto"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#614a5714be99b8bede9c9abe391a7f9607c966eb"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#0e82c044d92464990403bb67f791c873ceeab6f9"
 dependencies = [
  "aes_tools",
  "dh_tools",
@@ -4616,7 +4610,7 @@ dependencies = [
 [[package]]
 name = "wf_field"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#614a5714be99b8bede9c9abe391a7f9607c966eb"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#0e82c044d92464990403bb67f791c873ceeab6f9"
 dependencies = [
  "count-macro",
  "hex",
@@ -4634,7 +4628,7 @@ dependencies = [
 [[package]]
 name = "wf_parser"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#614a5714be99b8bede9c9abe391a7f9607c966eb"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#0e82c044d92464990403bb67f791c873ceeab6f9"
 dependencies = [
  "wf_buffer",
  "wf_field",
@@ -4643,7 +4637,7 @@ dependencies = [
 [[package]]
 name = "wf_validation"
 version = "0.1.0"
-source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#614a5714be99b8bede9c9abe391a7f9607c966eb"
+source = "git+https://github.com/fennelLabs/whiteflag-rust?branch=main#0e82c044d92464990403bb67f791c873ceeab6f9"
 dependencies = [
  "thiserror",
 ]
