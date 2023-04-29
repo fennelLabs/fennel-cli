@@ -1,4 +1,4 @@
-FROM rust:1.64 as base
+FROM rust:1.67
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -y && \
     ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime && \
@@ -8,22 +8,10 @@ RUN DEBIAN_FRONTEND=noninteractive \
     apt-get install clang libclang-dev libclang1 llvm llvm-dev clang-tools -y && \
     apt-get upgrade -y
 
-FROM base as planner
-WORKDIR app
-RUN cargo install cargo-chef
-COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
-
-FROM base as cacher
-WORKDIR app
-RUN cargo install cargo-chef
-COPY --from=planner /app/recipe.json recipe.json
-RUN cargo chef cook --release --recipe-path recipe.json
-
-FROM base as builder
 WORKDIR /app
+RUN rustup update stable
+RUN rustup default stable
 COPY . .
-COPY --from=cacher /app/target target
 RUN cargo build
 
-CMD ["cargo", "run", "--", "start-rpc"]
+CMD ["cargo", "run", "--bin", "fennel-cli", "--", "start-rpc"]
