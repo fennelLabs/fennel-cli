@@ -148,16 +148,6 @@ async fn rsa_verify(json: String) -> Result<impl warp::Reply, warp::Rejection> {
     )))
 }
 
-async fn whiteflag_encode(json: String) -> Result<impl warp::Reply, warp::Rejection> {
-    println!("Encoding message...");
-    let result = panic::catch_unwind(|| whiteflag_rust::encode_from_json(&json).unwrap());
-    let hex = match result {
-        Ok(v) => v,
-        Err(e) => format!("{:?}", e),
-    };
-    Ok(hex)
-}
-
 async fn whiteflag_decode(hex: String) -> Result<impl warp::Reply, warp::Rejection> {
     println!("Decoding message...");
     let message = json!(whiteflag_rust::decode_from_hex(hex).unwrap());
