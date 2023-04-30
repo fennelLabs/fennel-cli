@@ -29,7 +29,7 @@ jsonrpsee-http-server = "0.13.1"
 jsonrpsee-http-client = "0.13.1"
 jsonrpsee-proc-macros = "0.13.1"
 tokio = { version = "0.2", features = ["full"] }
-warp = "0.2"
+warp = "0.3"
 parking_lot = "0.10.0"
 serde = { version = "1", features = ["derive"] }
 hex = "0.4.3"
