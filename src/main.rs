@@ -2,6 +2,7 @@
 
 mod client;
 mod command;
+mod api;
 mod fennel_rpc;
 use clap::Parser;
 use client::{
@@ -14,6 +15,7 @@ use rsa::RsaPublicKey;
 use std::error::Error;
 
 use crate::client::{handle_aes_decrypt, prep_cipher};
+use crate::api::start_api;
 use crate::fennel_rpc::start_rpc;
 
 #[tokio::main]
@@ -88,6 +90,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         Commands::StartRPC {} => {
             println!("Starting RPC on localhost:9030");
             start_rpc().await?;
+        }
+
+        Commands::StartAPI {} => {
+            start_api().await;
         }
     }
 

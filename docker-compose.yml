@@ -4,7 +4,7 @@ services:
     volumes:
       - fennel-cli:/app
     ports:
-      - 9030:9030
+      - 9031:9031
 
 volumes:
   fennel-cli:
