@@ -15,6 +15,16 @@ use crate::client::{
 };
 use fennel_lib::{encrypt, verify, FennelRSAPublicKey};
 
+fn hashmap_to_json_string(map: HashMap<String, String>) -> String {
+    let mut json_string = String::from("{");
+    for (key, value) in map {
+        json_string.push_str(&format!("\"{}\":\"{}\",", key, value));
+    }
+    json_string.pop();
+    json_string.push('}');
+    json_string
+}
+
 async fn hello_there() -> Result<impl warp::Reply, warp::Rejection> {
     println!("Hello there!");
     let r = json!("General Kenobi!");
@@ -244,7 +254,16 @@ pub async fn start_api() {
         .and(warp::path::end())
         .and(warp::body::content_length_limit(1024 * 32))
         .and(warp::body::json())
-        .and_then(whiteflag_encode);
+        .map(|json_map: HashMap<String, String>| {
+            let json = hashmap_to_json_string(json_map);
+            println!("Encoding message...");
+            let result = panic::catch_unwind(|| whiteflag_rust::encode_from_json(&json).unwrap());
+            let hex = match result {
+                Ok(v) => v,
+                Err(e) => format!("{:?}", e),
+            };
+            hex
+        });
 
     let whiteflag_decode = warp::post()
         .and(warp::path("v1"))
