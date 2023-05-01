@@ -1,14 +1,11 @@
 use crate::{
-    client::{
-        handle_sign, handle_verify,
-        parse_shared_secret, prep_cipher,
-    },
+    client::{handle_sign, handle_verify, parse_shared_secret, prep_cipher},
     convert_rsa,
 };
 
 use super::{
-    handle_aes_decrypt, handle_aes_encrypt, handle_decrypt,
-    handle_diffie_hellman_one, handle_encrypt, handle_generate_keypair,
+    handle_aes_decrypt, handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one,
+    handle_encrypt, handle_generate_keypair,
 };
 
 #[test]

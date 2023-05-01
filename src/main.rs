@@ -1,8 +1,8 @@
 #![allow(deprecated)]
 
+mod api;
 mod client;
 mod command;
-mod api;
 mod fennel_rpc;
 use clap::Parser;
 use client::{
@@ -14,8 +14,8 @@ use fennel_lib::FennelRSAPublicKey;
 use rsa::RsaPublicKey;
 use std::error::Error;
 
-use crate::client::{handle_aes_decrypt, prep_cipher};
 use crate::api::start_api;
+use crate::client::{handle_aes_decrypt, prep_cipher};
 use crate::fennel_rpc::start_rpc;
 
 #[tokio::main]

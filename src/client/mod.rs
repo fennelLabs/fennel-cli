@@ -5,12 +5,10 @@ use fennel_lib::{
     export_keypair_to_file, generate_keypair, get_session_public_key, get_session_secret,
     get_shared_secret, hash, import_keypair_from_file,
     rsa_tools::{decrypt, encrypt},
-    sign, verify, AESCipher, FennelCipher, FennelRSAPublicKey
+    sign, verify, AESCipher, FennelCipher, FennelRSAPublicKey,
 };
+use std::path::PathBuf;
 use std::str;
-use std::{
-    path::PathBuf,
-};
 use x25519_dalek::{PublicKey, SharedSecret, StaticSecret};
 
 /// Convenience wrapper for managing local key storage.
