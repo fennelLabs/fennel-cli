@@ -21,11 +21,13 @@ RUN cargo install cargo-chef
 COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
-RUN cargo build
+RUN cargo build --release
 
 FROM base as builder
 WORKDIR /app
 COPY . .
 COPY --from=cacher /app/target target
 
-ENTRYPOINT ["cargo", "run", "--bin", "fennel-cli", "--", "start-rpc"]
+EXPOSE 9031
+
+ENTRYPOINT ["cargo", "run", "--release", "--bin", "fennel-cli", "--", "start-api"]
