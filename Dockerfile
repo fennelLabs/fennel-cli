@@ -30,4 +30,4 @@ COPY --from=cacher /app/target target
 
 EXPOSE 9031
 
-ENTRYPOINT ["cargo", "run", "--release", "--bin", "fennel-cli", "--", "start-api"]
+ENTRYPOINT ["./target/release/fennel-cli", "start-api"]
