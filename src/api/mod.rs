@@ -150,7 +150,11 @@ async fn rsa_verify(json: String) -> Result<impl warp::Reply, warp::Rejection> {
 
 async fn whiteflag_decode(hex: String) -> Result<impl warp::Reply, warp::Rejection> {
     println!("Decoding message...");
-    let message = json!(whiteflag_rust::decode_from_hex(hex).unwrap());
+    let message_result = whiteflag_rust::decode_from_hex(hex);
+    let message = match message_result {
+        Ok(message) => message,
+        Err(e) => format!("{:?}", e)
+    };
     Ok(warp::reply::json(&message))
 }
 
@@ -247,7 +251,7 @@ pub async fn start_api() {
         .map(|json_map: HashMap<String, String>| {
             let json = hashmap_to_json_string(json_map);
             println!("Encoding message...");
-            let result = panic::catch_unwind(|| whiteflag_rust::encode_from_json(&json).unwrap());
+            let result = whiteflag_rust::encode_from_json(&json);
             let hex = match result {
                 Ok(v) => v,
                 Err(e) => format!("{:?}", e),
