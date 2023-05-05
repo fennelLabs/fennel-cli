@@ -7,12 +7,12 @@ module "gce-container" {
   }
 }
 
-resource "google_compute_address" "fennel-service-api-ip" {
-  name = "fennel-service-api-ip"
+resource "google_compute_address" "fennel-service-cli-ip" {
+  name = "fennel-service-cli-ip"
 }
 
-resource "google_compute_instance" "fennel-service-api" {
-  name         = "fennel-service-api-instance"
+resource "google_compute_instance" "fennel-service-cli" {
+  name         = "fennel-service-cli-instance"
   machine_type = "e2-small"
   zone         = "us-east1-b"
 
@@ -29,7 +29,7 @@ resource "google_compute_instance" "fennel-service-api" {
     network    = "whiteflag-sandbox-vpc"
     subnetwork = "public-subnet"
      access_config {
-      nat_ip = google_compute_address.fennel-service-api-ip.address
+      nat_ip = google_compute_address.fennel-service-cli-ip.address
     }
   }
 
@@ -38,8 +38,8 @@ resource "google_compute_instance" "fennel-service-api" {
     apt-get update
     apt-get install -y docker.io
     gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin us-east1-docker.pkg.dev
-    docker pull us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-service-api:latest
-    docker run -dit -p 1234:1234 --name fennel-service-api us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-service-api:latest
+    docker pull us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-service-cli:latest
+    docker run -dit -p 9030:9030 --name fennel-service-cli us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-service-cli:latest
   EOF  
 
  metadata = {
