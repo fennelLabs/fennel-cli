@@ -1,0 +1,51 @@
+name: Release
+on:
+  push:
+
+jobs:
+  docker-release:
+    name: Tagged Docker release to Google Artifact Registry
+    runs-on: ubuntu-latest
+   
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - id: checkout
+        name: Checkout
+        uses: actions/checkout@v2
+
+      - id: auth
+        name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v0
+        with:
+          token_format: access_token
+          workload_identity_provider: projects/266537174077/locations/global/workloadIdentityPools/whiteflag-pool/providers/whiteflag-provider
+          service_account: docker-devops@whiteflag-0.iam.gserviceaccount.com
+          access_token_lifetime: 300s
+     
+      - name: Build Docker Image
+        env:
+          IMAGE_NAME: fennel-cli #create env called IMAGE_NAME consisted of actual name of Docker Image after we build
+          PROJECT_ID: whiteflag-0
+        run: docker build -t $IMAGE_NAME:latest . #build the docker image
+
+      - name: Login to Artifact Registry
+        uses: docker/login-action@v1
+        with:
+          registry: us-east1-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - name: Get tag
+        id: get-tag
+        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
+
+      - id: docker-push-tagged
+        name: Tag Docker image and push to Google Artifact Registry
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: |
+             us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-cli:latest
