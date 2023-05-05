@@ -23,7 +23,7 @@ jobs:
           token_format: access_token
           workload_identity_provider: projects/266537174077/locations/global/workloadIdentityPools/whiteflag-pool/providers/whiteflag-provider
           service_account: docker-devops@whiteflag-0.iam.gserviceaccount.com
-          access_token_lifetime: 3000s
+          access_token_lifetime: 30000s
      
       - name: Build Docker Image
         env:
