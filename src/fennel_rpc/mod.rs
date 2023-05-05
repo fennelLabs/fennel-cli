@@ -154,9 +154,9 @@ pub async fn start_rpc() -> anyhow::Result<()> {
     server.local_addr()?;
     server.start(module)?;
 
-    // loop {
-    //     tokio::time::sleep(std::time::Duration::from_millis(50)).await;
-    // }
+    loop {
+        tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+    }
 
     Ok(())
 }

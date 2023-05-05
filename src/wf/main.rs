@@ -24,18 +24,5 @@ pub fn main() {
             let cid = fennel_lib::add_content_by_string(&hex).unwrap();
             println!("hex: {}\ncid: {}", hex, cid);
         }
-        Commands::MessageWithReferenceIndicator {
-            code,
-            reference_indicator,
-        } => {
-            let message = wf_cli::WhiteflagCLICommands::message_with_reference(
-                code.to_string(),
-                reference_indicator.to_string(),
-            )
-            .unwrap();
-            let hex = message.as_hex().unwrap();
-            let cid = fennel_lib::add_content_by_string(&hex).unwrap();
-            println!("hex: {}\ncid: {}", hex, cid);
-        }
     }
 }

@@ -60,8 +60,4 @@ pub enum Commands {
     /// Runs a WebSocket RPC exposing crypto functions to parallel applications
     #[clap()]
     StartRPC {},
-
-    /// Runs a RESTful API exposing crypto functions to parallel applications
-    #[clap()]
-    StartAPI {},
 }
