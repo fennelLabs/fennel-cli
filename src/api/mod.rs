@@ -153,7 +153,7 @@ async fn whiteflag_decode(hex: String) -> Result<impl warp::Reply, warp::Rejecti
     let message_result = whiteflag_rust::decode_from_hex(hex);
     let message = match message_result {
         Ok(message) => message,
-        Err(e) => format!("{:?}", e)
+        Err(e) => format!("{:?}", e),
     };
     Ok(warp::reply::json(&message))
 }
