@@ -15,6 +15,12 @@ jobs:
       - id: checkout
         name: Checkout
         uses: actions/checkout@v2
+     
+      - name: Build Docker Image
+        env:
+          IMAGE_NAME: fennel-cli #create env called IMAGE_NAME consisted of actual name of Docker Image after we build
+          PROJECT_ID: whiteflag-0
+        run: docker build -t $IMAGE_NAME:latest . #build the docker image
 
       - id: auth
         name: Authenticate with Google Cloud
@@ -24,12 +30,6 @@ jobs:
           workload_identity_provider: projects/266537174077/locations/global/workloadIdentityPools/whiteflag-pool/providers/whiteflag-provider
           service_account: docker-devops@whiteflag-0.iam.gserviceaccount.com
           access_token_lifetime: 3600s
-     
-      - name: Build Docker Image
-        env:
-          IMAGE_NAME: fennel-cli #create env called IMAGE_NAME consisted of actual name of Docker Image after we build
-          PROJECT_ID: whiteflag-0
-        run: docker build -t $IMAGE_NAME:latest . #build the docker image
 
       - name: Login to Artifact Registry
         uses: docker/login-action@v1
