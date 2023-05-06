@@ -11,7 +11,7 @@ use super::{
 #[test]
 /// Tests the processes for generating keys, encrypting text, and decrypting the resulting ciphertext.
 fn test_handle_encrypt_and_decrypt() {
-    let (_, private_key, public_key) = handle_generate_keypair();
+    let (_, private_key, public_key) = handle_generate_keypair(4096);
     let key_bytes = convert_rsa(public_key);
 
     let result = handle_encrypt(&hex::encode(key_bytes), &String::from("test"));
@@ -22,7 +22,7 @@ fn test_handle_encrypt_and_decrypt() {
 
 #[test]
 fn test_handle_sign_and_verify() {
-    let (_, private_key, public_key) = handle_generate_keypair();
+    let (_, private_key, public_key) = handle_generate_keypair(4096);
     let key_bytes = convert_rsa(public_key);
 
     let signature = handle_sign(&String::from("Test"), private_key);

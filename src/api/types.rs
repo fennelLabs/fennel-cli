@@ -38,11 +38,13 @@ pub struct EncryptionPacket {
 #[derive(Debug, Deserialize)]
 pub struct DecryptionPacket {
     pub ciphertext: String,
+    pub private_key: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct SignPacket {
     pub message: String,
+    pub private_key: String,
 }
 
 #[derive(Debug, Deserialize)]

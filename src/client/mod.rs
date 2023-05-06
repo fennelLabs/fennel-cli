@@ -2,39 +2,16 @@
 mod tests;
 
 use fennel_lib::{
-    export_keypair_to_file, generate_keypair, get_session_public_key, get_session_secret,
-    get_shared_secret, hash, import_keypair_from_file,
+    generate_keypair, get_session_public_key, get_session_secret, get_shared_secret, hash,
     rsa_tools::{decrypt, encrypt},
     sign, verify, AESCipher, FennelCipher, FennelRSAPublicKey,
 };
-use std::path::PathBuf;
 use std::str;
 use x25519_dalek::{PublicKey, SharedSecret, StaticSecret};
 
 /// Convenience wrapper for managing local key storage.
-pub fn handle_generate_keypair() -> ([u8; 16], rsa::RsaPrivateKey, rsa::RsaPublicKey) {
-    let (private_key, public_key): (rsa::RsaPrivateKey, rsa::RsaPublicKey) =
-        match import_keypair_from_file(
-            PathBuf::from("./Private.key"),
-            PathBuf::from("./Public.key"),
-        ) {
-            Ok(v) => v,
-            Err(_) => {
-                println!("Setting up a new keypair...");
-                let (private_key, public_key) = generate_keypair(4096);
-                println!("Finished.");
-
-                export_keypair_to_file(
-                    &private_key,
-                    &public_key,
-                    PathBuf::from("./Private.key"),
-                    PathBuf::from("./Public.key"),
-                )
-                .expect("failed to export keypair");
-
-                (private_key, public_key)
-            }
-        };
+pub fn handle_generate_keypair(bits: usize) -> ([u8; 16], rsa::RsaPrivateKey, rsa::RsaPublicKey) {
+    let (private_key, public_key): (rsa::RsaPrivateKey, rsa::RsaPublicKey) = generate_keypair(bits);
 
     let pub_key = FennelRSAPublicKey::new(public_key).unwrap();
     let fingerprint: [u8; 16] = hash(pub_key.as_u8())[0..16].try_into().unwrap();

@@ -13,7 +13,7 @@ use crate::client::{
     handle_generate_keypair, handle_sign, pack_message, parse_shared_secret,
     prep_cipher_from_secret, unpack_message,
 };
-use fennel_lib::{encrypt, verify, FennelRSAPublicKey};
+use fennel_lib::{encrypt, verify, FennelRSAPrivateKey, FennelRSAPublicKey};
 
 fn hashmap_to_json_string(map: HashMap<String, String>) -> String {
     let mut json_string = String::from("{");
@@ -31,9 +31,9 @@ async fn hello_there() -> Result<impl warp::Reply, warp::Rejection> {
     Ok(warp::reply::json(&r))
 }
 
-async fn get_or_generate_keypair() -> Result<impl warp::Reply, warp::Rejection> {
+async fn generate_keypair() -> Result<impl warp::Reply, warp::Rejection> {
     println!("Generating keypair...");
-    let (_, _, public_key) = handle_generate_keypair();
+    let (_, _, public_key) = handle_generate_keypair(4096);
 
     let public_key_bytes = match FennelRSAPublicKey::new(public_key) {
         Ok(bytestring) => bytestring,
@@ -111,10 +111,11 @@ async fn rsa_decrypt(json: String) -> Result<impl warp::Reply, warp::Rejection> 
         serde_json::from_str(&json).expect("JSON was misformatted.");
 
     let ciphertext = hex::decode(params_struct.ciphertext).unwrap();
+    let private_key_bytes = hex::decode(params_struct.private_key).unwrap();
+    let private_key = FennelRSAPrivateKey::from_u8(&private_key_bytes).unwrap();
 
-    let (_, private_key, _) = handle_generate_keypair();
     Ok(hex::encode(
-        handle_decrypt(ciphertext, &private_key).as_bytes(),
+        handle_decrypt(ciphertext, &private_key.pk).as_bytes(),
     ))
 }
 
@@ -124,10 +125,11 @@ async fn rsa_sign(json: String) -> Result<impl warp::Reply, warp::Rejection> {
         serde_json::from_str(&json).expect("JSON was misformatted.");
 
     let message = params_struct.message.as_bytes();
+    let private_key_bytes = hex::decode(params_struct.private_key).unwrap();
+    let private_key = FennelRSAPrivateKey::from_u8(&private_key_bytes).unwrap();
 
-    let (_, private_key, _) = handle_generate_keypair();
     Ok(hex::encode(
-        handle_sign(&String::from_utf8_lossy(message), private_key).as_bytes(),
+        handle_sign(&String::from_utf8_lossy(message), private_key.pk).as_bytes(),
     ))
 }
 
@@ -178,7 +180,7 @@ pub async fn start_api() {
         .and(warp::path("v1"))
         .and(warp::path("get_or_generate_keypair"))
         .and(warp::path::end())
-        .and_then(get_or_generate_keypair);
+        .and_then(generate_keypair);
 
     let generate_encryption_channel = warp::post()
         .and(warp::path("v1"))
