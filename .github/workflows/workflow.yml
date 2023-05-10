@@ -30,6 +30,7 @@ jobs:
           workload_identity_provider: projects/266537174077/locations/global/workloadIdentityPools/whiteflag-pool/providers/whiteflag-provider
           service_account: docker-devops@whiteflag-0.iam.gserviceaccount.com
           access_token_lifetime: 3600s
+          retries: 3
 
       - name: Login to Artifact Registry
         uses: docker/login-action@v1

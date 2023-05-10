@@ -22,6 +22,7 @@ resource "google_compute_instance" "fennel-cli" {
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-11"
+      size = "20"
     }
   }
 
@@ -35,8 +36,8 @@ resource "google_compute_instance" "fennel-cli" {
 
   metadata_startup_script = <<EOF
     #!/bin/bash
-    apt-get update
-    apt-get install -y docker.io
+    sudo apt-get update
+    sudo apt-get install -y docker.io
     gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin us-east1-docker.pkg.dev
     docker pull us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-cli:latest
     docker run -dit -p 9031:9031 --name fennel-cli us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-cli:latest
