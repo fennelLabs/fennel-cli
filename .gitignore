@@ -8,3 +8,6 @@ venv/
 /target
 identity.db/
 message.db/
+.authlock
+upload.txt
+.DS_Store

@@ -20,7 +20,7 @@ use crate::fennel_rpc::start_rpc;
 async fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::parse();
 
-    let (_fingerprint, private_key, public_key) = handle_generate_keypair();
+    let (_fingerprint, private_key, public_key) = handle_generate_keypair(4096);
     let pk = FennelRSAPublicKey::new(public_key).unwrap();
 
     match &args.command {

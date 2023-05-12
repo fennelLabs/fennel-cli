@@ -27,7 +27,7 @@ pub async fn start_rpc() -> anyhow::Result<()> {
     module.register_method("hello_there", |_, _| Ok("General Kenobi!"))?;
 
     module.register_method("get_or_generate_keypair", |_, _| {
-        let (_, _, public_key) = handle_generate_keypair();
+        let (_, _, public_key) = handle_generate_keypair(4096);
 
         let public_key_bytes = match FennelRSAPublicKey::new(public_key) {
             Ok(bytestring) => bytestring,
@@ -103,7 +103,7 @@ pub async fn start_rpc() -> anyhow::Result<()> {
 
         let ciphertext = hex::decode(params_struct.ciphertext).unwrap();
 
-        let (_, private_key, _) = handle_generate_keypair();
+        let (_, private_key, _) = handle_generate_keypair(4096);
         Ok(hex::encode(
             handle_decrypt(ciphertext, &private_key).as_bytes(),
         ))
@@ -116,7 +116,7 @@ pub async fn start_rpc() -> anyhow::Result<()> {
 
         let message = params_struct.message.as_bytes();
 
-        let (_, private_key, _) = handle_generate_keypair();
+        let (_, private_key, _) = handle_generate_keypair(4096);
         Ok(hex::encode(
             handle_sign(&String::from_utf8_lossy(message), private_key).as_bytes(),
         ))
