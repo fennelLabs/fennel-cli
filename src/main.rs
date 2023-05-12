@@ -1,5 +1,6 @@
 #![allow(deprecated)]
 
+mod api;
 mod client;
 mod command;
 mod fennel_rpc;
@@ -13,6 +14,7 @@ use fennel_lib::FennelRSAPublicKey;
 use rsa::RsaPublicKey;
 use std::error::Error;
 
+use crate::api::start_api;
 use crate::client::{handle_aes_decrypt, prep_cipher};
 use crate::fennel_rpc::start_rpc;
 
@@ -88,6 +90,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         Commands::StartRPC {} => {
             println!("Starting RPC on localhost:9030");
             start_rpc().await?;
+        }
+
+        Commands::StartAPI {} => {
+            start_api().await;
         }
     }
 

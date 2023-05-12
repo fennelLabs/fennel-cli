@@ -1,4 +1,5 @@
-FROM rust:1.64 as base
+FROM rust:1.67 as base
+WORKDIR /app
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -y && \
     ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime && \
@@ -9,21 +10,24 @@ RUN DEBIAN_FRONTEND=noninteractive \
     apt-get upgrade -y
 
 FROM base as planner
-WORKDIR app
+WORKDIR /app
 RUN cargo install cargo-chef
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
 FROM base as cacher
-WORKDIR app
+WORKDIR /app
 RUN cargo install cargo-chef
 COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
+COPY . .
+RUN cargo build --release
 
 FROM base as builder
 WORKDIR /app
 COPY . .
 COPY --from=cacher /app/target target
-RUN cargo build
 
-CMD ["cargo", "run", "--", "start-rpc"]
+EXPOSE 9031
+
+ENTRYPOINT ["./target/release/fennel-cli", "start-api"]

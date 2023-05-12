@@ -1,0 +1,65 @@
+@hostname = localhost
+@port = 9031
+
+###
+# @name Whiteflag - Encode
+# @no-cookie-jar
+POST /v1/whiteflag_encode/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "prefix": "WF",
+    "version": "1",
+    "encryptionIndicator": "1",
+    "duressIndicator": "0",
+    "messageCode": "A",
+    "referenceIndicator": "0",
+    "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+    "verificationMethod": "1",
+    "verificationData": "https://organisation.int/whiteflag"
+}
+
+###
+# @name Whiteflag - Broken Encode
+# @no-cookie-jar
+POST /v1/whiteflag_encode/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "prefix": "WF",
+    "version": "1",
+    "encryptionIndicator": "1",
+    "duressIndicator": "0",
+    "messageCode": "P",
+    "referenceIndicator": "0",
+    "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+    "verificationMethod": "1",
+    "verificationData": "https://organisation.int/whiteflag",
+    "cryptoDataType": "0",
+    "cryptoData": "",
+    "text": "",
+    "resourceMethod": "",
+    "resourceData": "",
+    "pseudoMessageCode": "",
+    "subjectCode": "11",
+    "datetime": "",
+    "duration": "",
+    "objectType": "",
+    "objectLatitude": "",
+    "objectLongitude": "",
+    "objectSizeDim1": "",
+    "objectSizeDim2": "",
+    "objectOrientation": "",
+    "objectTypeQuant": ""
+}
+
+###
+# @name Whiteflag - Decode
+# @no-cookie-jar
+POST /v1/whiteflag_decode/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+"5746313020a00000000000000000000000000000000000000000000000000000000000000000b43a3a38399d1797b7b933b0b734b9b0ba34b7b71734b73a17bbb434ba32b33630b380"
