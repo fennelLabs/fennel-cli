@@ -56,6 +56,5 @@ resource "google_compute_instance" "fennel-cli" {
 resource "google_storage_bucket_object" "example_object" {
   name   = "fennel-cli-ip.sh"
   bucket = "whiteflag-0-admin"
-  source = "fennel-cli-ip.sh"
   content = google_compute_address.fennel-cli-ip.address
 }
