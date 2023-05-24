@@ -56,5 +56,5 @@ resource "google_compute_instance" "fennel-cli" {
 data "google_compute_instance" "fennel-cli" {
   name = "fennel-cli-instance"
   project      = "whiteflag-0"
-  region         = "us-east1"
+  zone         = "us-east1-b"
 }
