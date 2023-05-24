@@ -52,3 +52,7 @@ resource "google_compute_instance" "fennel-cli" {
     scopes = ["cloud-platform"]
   }
 }
+
+data "google_compute_instance" "fennel-cli" {
+  name = "fennel-cli-instance"
+}
