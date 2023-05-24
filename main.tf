@@ -53,8 +53,9 @@ resource "google_compute_instance" "fennel-cli" {
   }
 }
 
-data "google_compute_instance" "fennel-cli" {
-  name = "fennel-cli-instance"
-  project      = "whiteflag-0"
-  zone         = "us-east1-b"
+resource "google_storage_bucket_object" "example_object" {
+  name   = "fennel-cli-ip.sh"
+  bucket = "whiteflag-0-admin"
+  source = "fennel-cli-ip.sh"
+  content = google_compute_address.fennel-cli-ip.address
 }
