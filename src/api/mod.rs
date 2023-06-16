@@ -283,5 +283,5 @@ pub async fn start_api() {
         .or(whiteflag_encode)
         .or(whiteflag_decode);
 
-    warp::serve(routes).run(([127, 0, 0, 1], 9031)).await;
+    warp::serve(routes).run(([0, 0, 0, 0], 9031)).await;
 }
