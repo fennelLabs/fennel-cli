@@ -45,4 +45,4 @@ jobs:
 
       - name: 'Docker push'
         run: |-
-          docker push us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/polkadot-protocol:latest
+          docker push us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-cli:latest
