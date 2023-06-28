@@ -253,12 +253,11 @@ pub async fn start_api() {
         .map(|json_map: HashMap<String, String>| {
             let json = hashmap_to_json_string(json_map);
             println!("Encoding message...");
-            let result = whiteflag_rust::encode_from_json(&json);
-            let hex = match result {
+            let result = whiteflag_rust::encode_from_json(json);
+            match result {
                 Ok(v) => v,
                 Err(e) => format!("{:?}", e),
-            };
-            hex
+            }
         });
 
     let whiteflag_decode = warp::post()
