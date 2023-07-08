@@ -1,5 +1,11 @@
-@hostname = localhost
-@port = 9031
+@hostname = bitwise.fennellabs.com
+@port = 443
+
+###
+# @name Hello There!
+# @no-cookie-jar
+GET /v1/hello_there/
+Host: {{hostname}}:{{port}}
 
 ###
 # @name Whiteflag - Encode

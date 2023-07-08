@@ -1,6 +1,8 @@
 name: Release
 on:
   push:
+    branches:
+      - main
 
 jobs:
   docker-release:
@@ -20,7 +22,7 @@ jobs:
         env:
           IMAGE_NAME: fennel-cli #create env called IMAGE_NAME consisted of actual name of Docker Image after we build
           PROJECT_ID: whiteflag-0
-        run: docker build -t $IMAGE_NAME:latest . #build the docker image
+        run: docker build -t  us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/$IMAGE_NAME:latest . #build the docker image
 
       - id: auth
         name: Authenticate with Google Cloud
@@ -30,6 +32,7 @@ jobs:
           workload_identity_provider: projects/266537174077/locations/global/workloadIdentityPools/whiteflag-pool/providers/whiteflag-provider
           service_account: docker-devops@whiteflag-0.iam.gserviceaccount.com
           access_token_lifetime: 3600s
+          retries: 3
 
       - name: Login to Artifact Registry
         uses: docker/login-action@v1
@@ -42,10 +45,6 @@ jobs:
         id: get-tag
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
 
-      - id: docker-push-tagged
-        name: Tag Docker image and push to Google Artifact Registry
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          tags: |
-             us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-cli:latest
+      - name: 'Docker push'
+        run: |-
+          docker push us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-cli:latest

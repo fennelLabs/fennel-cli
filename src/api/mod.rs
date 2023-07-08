@@ -253,12 +253,11 @@ pub async fn start_api() {
         .map(|json_map: HashMap<String, String>| {
             let json = hashmap_to_json_string(json_map);
             println!("Encoding message...");
-            let result = whiteflag_rust::encode_from_json(&json);
-            let hex = match result {
+            let result = whiteflag_rust::encode_from_json(json);
+            match result {
                 Ok(v) => v,
                 Err(e) => format!("{:?}", e),
-            };
-            hex
+            }
         });
 
     let whiteflag_decode = warp::post()
@@ -283,5 +282,5 @@ pub async fn start_api() {
         .or(whiteflag_encode)
         .or(whiteflag_decode);
 
-    warp::serve(routes).run(([127, 0, 0, 1], 9031)).await;
+    warp::serve(routes).run(([0, 0, 0, 0], 9031)).await;
 }

@@ -13,10 +13,7 @@ pub fn main() {
             println!("{}", wf_cli::WhiteflagCLICommands::decode(hex).unwrap());
         }
         Commands::Auth { logout } => {
-            println!(
-                "{}",
-                wf_cli::WhiteflagCLICommands::auth(logout.clone()).unwrap()
-            );
+            println!("{}", wf_cli::WhiteflagCLICommands::auth(*logout).unwrap());
         }
         Commands::Message { code } => {
             let message = wf_cli::WhiteflagCLICommands::message(code.to_owned()).unwrap();
