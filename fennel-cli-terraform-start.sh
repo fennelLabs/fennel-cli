@@ -11,4 +11,4 @@ sudo certbot --nginx --non-interactive --agree-tos --email info@fennellabs.com -
 sudo systemctl restart nginx
 gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin us-east1-docker.pkg.dev
 docker run -dt -p 9031:9031 --name fennel-cli us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-cli:latest
-docker exec fennel-cli /app/target/release/build/fennel-cli start-api
+docker exec fennel-cli /app/target/release/fennel-cli start-api
