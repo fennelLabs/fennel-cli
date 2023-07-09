@@ -27,7 +27,3 @@ FROM base as builder
 WORKDIR /app
 COPY . .
 COPY --from=cacher /app/target target
-
-EXPOSE 9031
-
-ENTRYPOINT ["./target/release/fennel-cli", "start-api"]
