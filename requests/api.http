@@ -1,8 +1,6 @@
-#@hostname = bitwise.fennellabs.com
-#@port = 443
+@hostname = bitwise.fennellabs.com
+@port = 443
 
-@hostname = localhost
-@port = 9031
 
 ###
 # @name Hello There!
