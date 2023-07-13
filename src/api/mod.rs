@@ -10,8 +10,7 @@ mod types;
 
 use crate::client::{
     handle_aes_decrypt, handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one,
-    handle_generate_keypair, handle_sign, pack_message, parse_shared_secret,
-    prep_cipher_from_secret, unpack_message,
+    handle_generate_keypair, handle_sign, parse_shared_secret, prep_cipher_from_secret,
 };
 use fennel_lib::{encrypt, verify, FennelRSAPrivateKey, FennelRSAPublicKey};
 
@@ -54,43 +53,6 @@ async fn generate_encryption_channel() -> Result<impl warp::Reply, warp::Rejecti
         public: hex::encode(public.to_bytes()),
     };
     Ok(warp::reply::json(&r))
-}
-
-async fn accept_encryption_channel(json: String) -> Result<impl warp::Reply, warp::Rejection> {
-    println!("Accepting encryption channel...");
-    let params_struct: types::AcceptEncryptionChannelPacket =
-        serde_json::from_str(&json).expect("JSON was misformatted.");
-    let shared_secret = parse_shared_secret(params_struct.secret.to_string(), params_struct.public);
-    let r = types::AcceptEncryptionChannelResponse {
-        shared_secret: hex::encode(shared_secret.to_bytes()),
-    };
-    Ok(warp::reply::json(&r))
-}
-
-async fn dh_encrypt(json: String) -> Result<impl warp::Reply, warp::Rejection> {
-    println!("Encrypting message...");
-    let params_struct: types::DhEncryptPacket =
-        serde_json::from_str(&json).expect("JSON was misformatted.");
-    let shared_secret: [u8; 32] = hex::decode(params_struct.shared_secret)
-        .unwrap()
-        .try_into()
-        .expect("Unable to match shared secret to a length of 32 bytes.");
-    let cipher = prep_cipher_from_secret(&shared_secret);
-    let ciphertext = handle_aes_encrypt(cipher, params_struct.plaintext);
-    Ok(hex::encode(pack_message(ciphertext)))
-}
-
-async fn dh_decrypt(json: String) -> Result<impl warp::Reply, warp::Rejection> {
-    println!("Decrypting message...");
-    let params_struct: types::DhDecryptPacket =
-        serde_json::from_str(&json).expect("JSON was misformatted.");
-    let ciphertext_mod = unpack_message(params_struct.ciphertext.into_bytes());
-    let shared_secret: [u8; 32] = hex::decode(params_struct.shared_secret)
-        .unwrap()
-        .try_into()
-        .expect("Unable to match shared secret to a length of 32 bytes.");
-    let cipher = prep_cipher_from_secret(&shared_secret);
-    Ok(handle_aes_decrypt(cipher, ciphertext_mod.to_vec()))
 }
 
 async fn rsa_encrypt(json: String) -> Result<impl warp::Reply, warp::Rejection> {
@@ -161,7 +123,7 @@ async fn whiteflag_decode(hex: String) -> Result<impl warp::Reply, warp::Rejecti
 }
 
 pub async fn start_api() {
-    println!("Starting server on port 9031...");
+    println!("Starting server on port 9031");
 
     let hello = warp::get()
         .and(warp::path("v1"))
@@ -194,7 +156,18 @@ pub async fn start_api() {
         .and(warp::path::end())
         .and(warp::body::content_length_limit(1024 * 32))
         .and(warp::body::json())
-        .and_then(accept_encryption_channel);
+        .map(|json_map: HashMap<String, String>| {
+            println!("Accepting encryption channel...");
+            let json = hashmap_to_json_string(json_map);
+            let params_struct: types::AcceptEncryptionChannelPacket =
+                serde_json::from_str(&json).expect("JSON was misformatted.");
+            let shared_secret =
+                parse_shared_secret(params_struct.secret.to_string(), params_struct.public);
+            let r = types::AcceptEncryptionChannelResponse {
+                shared_secret: hex::encode(shared_secret.to_bytes()),
+            };
+            Ok(warp::reply::json(&r))
+        });
 
     let dh_encrypt = warp::post()
         .and(warp::path("v1"))
@@ -202,7 +175,19 @@ pub async fn start_api() {
         .and(warp::path::end())
         .and(warp::body::content_length_limit(1024 * 32))
         .and(warp::body::json())
-        .and_then(dh_encrypt);
+        .map(|json_map: HashMap<String, String>| {
+            println!("Encrypting message...");
+            let json = hashmap_to_json_string(json_map);
+            let params_struct: types::DhEncryptPacket =
+                serde_json::from_str(&json).expect("JSON was misformatted.");
+            let shared_secret: [u8; 32] = hex::decode(params_struct.shared_secret)
+                .unwrap()
+                .try_into()
+                .expect("Unable to match shared secret to a length of 32 bytes.");
+            let cipher = prep_cipher_from_secret(&shared_secret);
+            let ciphertext = handle_aes_encrypt(cipher, params_struct.plaintext);
+            Ok(hex::encode(ciphertext))
+        });
 
     let dh_decrypt = warp::post()
         .and(warp::path("v1"))
@@ -210,7 +195,22 @@ pub async fn start_api() {
         .and(warp::path::end())
         .and(warp::body::content_length_limit(1024 * 32))
         .and(warp::body::json())
-        .and_then(dh_decrypt);
+        .map(|json_map: HashMap<String, String>| {
+            println!("Decrypting message...");
+            let json = hashmap_to_json_string(json_map);
+            let params_struct: types::DhDecryptPacket =
+                serde_json::from_str(&json).expect("JSON was misformatted.");
+            let ciphertext_mod = match hex::decode(params_struct.ciphertext) {
+                Ok(v) => v,
+                Err(e) => panic!("Problem with decoding ciphertext: {}", e),
+            };
+            let shared_secret: [u8; 32] = hex::decode(params_struct.shared_secret)
+                .unwrap()
+                .try_into()
+                .expect("Unable to match shared secret to a length of 32 bytes.");
+            let cipher = prep_cipher_from_secret(&shared_secret);
+            Ok(handle_aes_decrypt(cipher, ciphertext_mod))
+        });
 
     let rsa_encrypt = warp::post()
         .and(warp::path("v1"))

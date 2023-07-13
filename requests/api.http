@@ -1,5 +1,8 @@
-@hostname = bitwise.fennellabs.com
-@port = 443
+#@hostname = bitwise.fennellabs.com
+#@port = 443
+
+@hostname = localhost
+@port = 9031
 
 ###
 # @name Hello There!
@@ -69,3 +72,46 @@ Host: {{hostname}}:{{port}}
 Content-Type: application/json
 
 "5746313020a00000000000000000000000000000000000000000000000000000000000000000b43a3a38399d1797b7b933b0b734b9b0ba34b7b71734b73a17bbb434ba32b33630b380"
+
+###
+# @name Generate Encryption Channel
+# @no-cookie-jar
+POST /v1/generate_encryption_channel/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+###
+# @name Accept Encryption Channel
+# @no-cookie-jar
+POST /v1/accept_encryption_channel/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "secret": "d8eb4daf0686892944e95b8b63e09f58ea4fdaeef0fe86e20d98e8b2a19c0072",
+    "public": "0402ae7ca1142a2c64d979cf6cd039af9bc78241e893ef5bfec9f323e3b9ae4b"
+}
+
+###
+# @name DH Encrypt
+# @no-cookie-jar
+POST /v1/dh_encrypt/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "plaintext": "This is a test.",
+    "shared_secret": "bc9fc6e2629eddd82ec1bdfae268288de8db724e12ebd3eb6f99d9a686cc457e"
+}
+
+###
+# @name DH Decrypt
+# @no-cookie-jar
+POST /v1/dh_decrypt/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "ciphertext": "69896cf7441d14d7d10a6f39e0ef9b182d451f1101887ae5ff3fd00657efc389cde272d0d25dfcddb2ef0e241d0ea08c",
+    "shared_secret": "bc9fc6e2629eddd82ec1bdfae268288de8db724e12ebd3eb6f99d9a686cc457e"
+}
