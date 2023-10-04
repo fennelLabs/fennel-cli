@@ -114,10 +114,18 @@ async fn rsa_verify(json: String) -> Result<impl warp::Reply, warp::Rejection> {
 
 async fn whiteflag_decode(hex: String) -> Result<impl warp::Reply, warp::Rejection> {
     println!("Decoding message...");
-    let message_result = whiteflag_rust::decode_from_hex(hex);
-    let message = match message_result {
-        Ok(message) => message,
-        Err(e) => format!("{:?}", e),
+    let result = whiteflag_rust::decode_from_hex(hex);
+    let message = match result.is_ok() {
+        true => types::WhiteflagDecodeResponse {
+            success: true,
+            decoded: Some(result.unwrap()),
+            error: None,
+        },
+        false => types::WhiteflagDecodeResponse {
+            success: false,
+            decoded: None,
+            error: Some(result.unwrap_err().to_string()),
+        },
     };
     Ok(warp::reply::json(&message))
 }
@@ -254,10 +262,19 @@ pub async fn start_api() {
             let json = hashmap_to_json_string(json_map);
             println!("Encoding message...");
             let result = whiteflag_rust::encode_from_json(json);
-            match result {
-                Ok(v) => v,
-                Err(e) => format!("{:?}", e),
-            }
+            let response = match result {
+                Ok(s) => types::WhiteflagEncodeResponse {
+                    success: true,
+                    encoded: Some(s),
+                    error: None,
+                },
+                Err(e) => types::WhiteflagEncodeResponse {
+                    success: false,
+                    encoded: None,
+                    error: Some(format!("{:?}", e)),
+                },
+            };
+            Ok(warp::reply::json(&response))
         });
 
     let whiteflag_decode = warp::post()

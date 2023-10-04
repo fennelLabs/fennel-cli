@@ -1,5 +1,19 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct WhiteflagEncodeResponse {
+    pub success: bool,
+    pub encoded: Option<String>,
+    pub error: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct WhiteflagDecodeResponse {
+    pub success: bool,
+    pub decoded: Option<String>,
+    pub error: Option<String>,
+}
+
 #[derive(Debug, Serialize)]
 pub struct GenerateEncryptionChannelResponse {
     pub secret: String,
