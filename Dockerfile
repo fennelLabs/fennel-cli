@@ -1,4 +1,4 @@
-FROM rust:1.67 as base
+FROM rust:1.70 as base
 WORKDIR /app
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -y && \
