@@ -67,3 +67,16 @@ pub struct VerifyPacket {
     pub message: String,
     pub signature: String,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct BigMultiplyPacket {
+    pub a: u128,
+    pub b: u128,
+}
+
+#[derive(Debug, Serialize)]
+pub struct BigMultiplyResponse {
+    pub success: bool,
+    pub result: u128,
+    pub error: Option<String>,
+}

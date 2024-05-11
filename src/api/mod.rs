@@ -8,10 +8,10 @@ use warp::Filter;
 
 mod types;
 
-use crate::client::{
+use crate::{api::types::BigMultiplyResponse, client::{
     handle_aes_decrypt, handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one,
     handle_generate_keypair, handle_sign, parse_shared_secret, prep_cipher_from_secret,
-};
+}};
 use fennel_lib::{encrypt, verify, FennelRSAPrivateKey, FennelRSAPublicKey};
 
 fn hashmap_to_json_string(map: HashMap<String, String>) -> String {
@@ -285,6 +285,35 @@ pub async fn start_api() {
         .and(warp::body::json())
         .and_then(whiteflag_decode);
 
+    let big_multiply = warp::post()
+        .and(warp::path("v1"))
+        .and(warp::path("big_multiply"))
+        .and(warp::path::end())
+        .and(warp::body::content_length_limit(1024 * 32))
+        .and(warp::body::json())
+        .map(|json_map: HashMap<String, String>| {
+            let json = hashmap_to_json_string(json_map);
+            println!("Multiplying big numbers...");
+            let params_struct: types::BigMultiplyPacket =
+                serde_json::from_str(&json).expect("JSON was misformatted.");
+            let a: u128 = params_struct.a;
+            let b: u128 = params_struct.b;
+            // Check for overflow and return an error if it occurs
+            let c: BigMultiplyResponse = match a.checked_mul(b) {
+                Some(result) => BigMultiplyResponse {
+                    success: true,
+                    result,
+                    error: None,
+                },
+                None => BigMultiplyResponse {
+                    success: false,
+                    result: 0,
+                    error: Some("Overflow error".to_string()),
+                },
+            };
+            Ok(warp::reply::json(&c))
+        });
+
     let routes = hello
         .or(post_test)
         .or(keypair)
@@ -297,7 +326,8 @@ pub async fn start_api() {
         .or(rsa_sign)
         .or(rsa_verify)
         .or(whiteflag_encode)
-        .or(whiteflag_decode);
+        .or(whiteflag_decode)
+        .or(big_multiply);
 
     warp::serve(routes).run(([0, 0, 0, 0], 9031)).await;
 }
