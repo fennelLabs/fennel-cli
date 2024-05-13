@@ -8,10 +8,10 @@ use warp::Filter;
 
 mod types;
 
-use crate::client::{
+use crate::{api::types::BigMultiplyResponse, client::{
     handle_aes_decrypt, handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one,
     handle_generate_keypair, handle_sign, parse_shared_secret, prep_cipher_from_secret,
-};
+}};
 use fennel_lib::{encrypt, verify, FennelRSAPrivateKey, FennelRSAPublicKey};
 
 fn hashmap_to_json_string(map: HashMap<String, String>) -> String {
@@ -285,8 +285,6 @@ pub async fn start_api() {
         .and(warp::body::json())
         .and_then(whiteflag_decode);
 
-<<<<<<< Updated upstream
-=======
     let big_multiply = warp::post()
         .and(warp::path("v1"))
         .and(warp::path("big_multiply"))
@@ -327,7 +325,6 @@ pub async fn start_api() {
             Ok(warp::reply::json(&c))
         });
 
->>>>>>> Stashed changes
     let routes = hello
         .or(post_test)
         .or(keypair)
@@ -340,7 +337,8 @@ pub async fn start_api() {
         .or(rsa_sign)
         .or(rsa_verify)
         .or(whiteflag_encode)
-        .or(whiteflag_decode);
+        .or(whiteflag_decode)
+        .or(big_multiply);
 
     warp::serve(routes).run(([0, 0, 0, 0], 9031)).await;
 }
