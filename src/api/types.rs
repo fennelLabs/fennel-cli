@@ -67,3 +67,19 @@ pub struct VerifyPacket {
     pub message: String,
     pub signature: String,
 }
+<<<<<<< Updated upstream
+=======
+
+#[derive(Debug, Deserialize)]
+pub struct BigMultiplyPacket {
+    pub a: Option<String>,
+    pub b: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct BigMultiplyResponse {
+    pub success: bool,
+    pub result: u128,
+    pub error: Option<String>,
+}
+>>>>>>> Stashed changes

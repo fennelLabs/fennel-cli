@@ -285,6 +285,49 @@ pub async fn start_api() {
         .and(warp::body::json())
         .and_then(whiteflag_decode);
 
+<<<<<<< Updated upstream
+=======
+    let big_multiply = warp::post()
+        .and(warp::path("v1"))
+        .and(warp::path("big_multiply"))
+        .and(warp::path::end())
+        .and(warp::body::content_length_limit(1024 * 32))
+        .and(warp::body::json())
+        .map(|json_map: HashMap<String, String>| {
+            let json = hashmap_to_json_string(json_map);
+            println!("Multiplying big numbers...");
+            let params_struct: types::BigMultiplyPacket = match serde_json::from_str(&json) {
+                Ok(s) => s,
+                Err(e) => {
+                    println!("Problem with deserializing JSON: {}", e);
+                    types::BigMultiplyPacket { a: None, b: None }
+                }
+            };
+            if params_struct.a.is_none() || params_struct.b.is_none() {
+                return Ok(warp::reply::json(&BigMultiplyResponse {
+                    success: false,
+                    result: 0,
+                    error: Some("Invalid input".to_string()),
+                }));
+            }
+            let a = params_struct.a.unwrap().parse::<u128>().unwrap();
+            let b = params_struct.b.unwrap().parse::<u128>().unwrap();
+            let c: BigMultiplyResponse = match a.checked_mul(b) {
+                Some(result) => BigMultiplyResponse {
+                    success: true,
+                    result,
+                    error: None,
+                },
+                None => BigMultiplyResponse {
+                    success: false,
+                    result: 0,
+                    error: Some("Overflow error".to_string()),
+                },
+            };
+            Ok(warp::reply::json(&c))
+        });
+
+>>>>>>> Stashed changes
     let routes = hello
         .or(post_test)
         .or(keypair)

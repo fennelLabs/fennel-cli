@@ -1,5 +1,5 @@
-@hostname = bitwise.fennellabs.com
-@port = 443
+@hostname = localhost
+@port = 9031
 
 
 ###
@@ -103,4 +103,16 @@ Content-Type: application/json
 {
     "ciphertext": "69896cf7441d14d7d10a6f39e0ef9b182d451f1101887ae5ff3fd00657efc389cde272d0d25dfcddb2ef0e241d0ea08c",
     "shared_secret": "bc9fc6e2629eddd82ec1bdfae268288de8db724e12ebd3eb6f99d9a686cc457e"
+}
+
+###
+# @name Big Multiply
+# @no-cookie-jar
+POST /v1/big_multiply/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "a": "10",
+    "b": "10"
 }
