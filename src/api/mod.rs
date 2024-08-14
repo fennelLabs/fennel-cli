@@ -8,10 +8,13 @@ use warp::Filter;
 
 mod types;
 
-use crate::{api::types::BigMultiplyResponse, client::{
-    handle_aes_decrypt, handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one,
-    handle_generate_keypair, handle_sign, parse_shared_secret, prep_cipher_from_secret,
-}};
+use crate::{
+    api::types::BigMultiplyResponse,
+    client::{
+        handle_aes_decrypt, handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one,
+        handle_generate_keypair, handle_sign, parse_shared_secret, prep_cipher_from_secret,
+    },
+};
 use fennel_lib::{encrypt, verify, FennelRSAPrivateKey, FennelRSAPublicKey};
 
 fn hashmap_to_json_string(map: HashMap<String, String>) -> String {
