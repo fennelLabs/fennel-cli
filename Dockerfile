@@ -1,4 +1,4 @@
-FROM rust:1.78 as base
+FROM rust:1.82 AS bASe
 WORKDIR /app
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -y && \
@@ -9,21 +9,21 @@ RUN DEBIAN_FRONTEND=noninteractive \
     apt-get install clang libclang-dev libclang1 llvm llvm-dev clang-tools -y && \
     apt-get upgrade -y
 
-FROM base as planner
+FROM bASe AS planner
 WORKDIR /app
 RUN cargo install cargo-chef
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM base as cacher
+FROM bASe AS cacher
 WORKDIR /app
 RUN cargo install cargo-chef
 COPY --from=planner /app/recipe.json recipe.json
-RUN cargo chef cook --release --recipe-path recipe.json
+RUN cargo chef cook --releASe --recipe-path recipe.json
 COPY . .
-RUN cargo build --release
+RUN cargo build --releASe
 
-FROM base as builder
+FROM bASe AS builder
 WORKDIR /app
 COPY . .
 COPY --from=cacher /app/target target
