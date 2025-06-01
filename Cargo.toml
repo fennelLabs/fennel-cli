@@ -24,10 +24,10 @@ rsa = "0.5.0"
 bytes = "1.1.0"
 rand = "0.8.4"
 sha3 = "0.10.0"
-jsonrpsee = { version = "0.13.0", features = ["full"] }
-jsonrpsee-http-server = "0.13.1"
-jsonrpsee-http-client = "0.13.1"
-jsonrpsee-proc-macros = "0.13.1"
+jsonrpsee = { version = "0.15.1", features = ["full"] }
+jsonrpsee-http-server = "0.15.1"
+jsonrpsee-http-client = "0.15.1"
+jsonrpsee-proc-macros = "0.15.1"
 tokio = { version = "0.2", features = ["full"] }
 warp = "0.2"
 parking_lot = "0.10.0"
