@@ -260,9 +260,10 @@ pub async fn start_api() {
         .and(warp::path("whiteflag_encode"))
         .and(warp::path::end())
         .and(warp::body::content_length_limit(1024 * 32))
-        .and(warp::body::json())
-        .map(|json_map: HashMap<String, String>| {
-            let json = hashmap_to_json_string(json_map);
+        .and(warp::body::bytes())
+        .map(|body: warp::hyper::body::Bytes| {
+            // Convert bytes directly to string - the JSON is already properly formatted by the API
+            let json = String::from_utf8_lossy(&body).to_string();
             println!("Encoding message...");
             let result = whiteflag_rust::encode_from_json(json);
             let response = match result {
