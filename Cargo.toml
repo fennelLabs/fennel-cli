@@ -1,6 +1,6 @@
 [package]
 name = "fennel-cli"
-version = "1.1.1"
+version = "1.1.3"
 edition = "2021"
 
 [[bin]]
@@ -36,8 +36,8 @@ hex = "0.4.3"
 x25519-dalek = "2.0.0-pre.1"
 codec = { version = "2.3.1", package = "parity-scale-codec", features = ["derive"] }
 fennel-lib = { git = "https://github.com/fennelLabs/fennel-lib", branch = "master", package = "fennel-lib" }
-whiteflag-rust = { git = "https://github.com/fennelLabs/whiteflag-rust", branch = "main", package = "fennel-whiteflag" }
-wf_cli = { git = "https://github.com/fennelLabs/whiteflag-rust", branch = "main", package = "wf_cli" }
+whiteflag-rust = { git = "https://github.com/fennelLabs/whiteflag-rust", branch = "whiteflagupdate2025", package = "fennel-whiteflag" }
+wf_cli = { git = "https://github.com/fennelLabs/whiteflag-rust", branch = "whiteflagupdate2025", package = "wf_cli" }
 futures = "0.3"
 sp-keyring = "5.0.0"
 serde_json = "1.0.81"
