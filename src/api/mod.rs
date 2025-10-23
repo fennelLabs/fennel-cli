@@ -5,6 +5,7 @@ use std::{collections::HashMap, panic};
 
 use serde_json::json;
 use warp::Filter;
+use wf_auth;
 
 mod types;
 
@@ -329,6 +330,196 @@ pub async fn start_api() {
             Ok(warp::reply::json(&c))
         });
 
+    let derive_auth_token = warp::post()
+        .and(warp::path("v1"))
+        .and(warp::path("derive_auth_token"))
+        .and(warp::path::end())
+        .and(warp::body::content_length_limit(1024 * 32))
+        .and(warp::body::json())
+        .map(|json_map: HashMap<String, String>| {
+            let json = hashmap_to_json_string(json_map);
+            println!("Deriving authentication token...");
+            let params_struct: types::DeriveAuthTokenPacket =
+                serde_json::from_str(&json).expect("JSON was misformatted.");
+
+            // Decode hex strings to bytes
+            let secret_result = hex::decode(&params_struct.secret);
+            let context_result = hex::decode(&params_struct.context);
+
+            let response = match (secret_result, context_result) {
+                (Ok(secret_bytes), Ok(context_bytes)) => {
+                    // Use wf_auth to derive the token using HKDF
+                    let auth_token = wf_auth::WhiteflagAuthToken::new(secret_bytes);
+                    match auth_token.get_verification_data(context_bytes) {
+                        Ok(derived) => types::DeriveAuthTokenResponse {
+                            success: true,
+                            derived_token: Some(hex::encode(derived)),
+                            error: None,
+                        },
+                        Err(e) => types::DeriveAuthTokenResponse {
+                            success: false,
+                            derived_token: None,
+                            error: Some(format!("HKDF derivation failed: {:?}", e)),
+                        },
+                    }
+                }
+                (Err(e), _) => types::DeriveAuthTokenResponse {
+                    success: false,
+                    derived_token: None,
+                    error: Some(format!("Invalid secret hex: {}", e)),
+                },
+                (_, Err(e)) => types::DeriveAuthTokenResponse {
+                    success: false,
+                    derived_token: None,
+                    error: Some(format!("Invalid context hex: {}", e)),
+                },
+            };
+
+            Ok(warp::reply::json(&response))
+        });
+
+    // ECDH endpoints for Whiteflag Method 2 authentication
+    let generate_ecdh_keypair = warp::post()
+        .and(warp::path("v1"))
+        .and(warp::path("generate_ecdh_keypair"))
+        .and(warp::path::end())
+        .and_then(|| async {
+            println!("Generating ECDH keypair (X25519)...");
+            let (secret, public) = handle_diffie_hellman_one();
+            
+            let response = types::GenerateEcdhKeypairResponse {
+                success: true,
+                private_key: Some(hex::encode(secret.to_bytes())),
+                public_key: Some(hex::encode(public.to_bytes())),
+                error: None,
+            };
+            
+            Ok::<_, warp::Rejection>(warp::reply::json(&response))
+        });
+
+    let compute_ecdh_shared_secret = warp::post()
+        .and(warp::path("v1"))
+        .and(warp::path("compute_ecdh_shared_secret"))
+        .and(warp::path::end())
+        .and(warp::body::content_length_limit(1024 * 32))
+        .and(warp::body::json())
+        .map(|json_map: HashMap<String, String>| {
+            let json = hashmap_to_json_string(json_map);
+            println!("Computing ECDH shared secret...");
+            let params_struct: types::ComputeEcdhSharedSecretPacket =
+                serde_json::from_str(&json).expect("JSON was misformatted.");
+
+            let response = match (
+                hex::decode(&params_struct.my_private_key),
+                hex::decode(&params_struct.their_public_key),
+            ) {
+                (Ok(private_bytes), Ok(public_bytes)) => {
+                    if private_bytes.len() != 32 || public_bytes.len() != 32 {
+                        types::ComputeEcdhSharedSecretResponse {
+                            success: false,
+                            shared_secret: None,
+                            error: Some("Keys must be 32 bytes (64 hex chars)".to_string()),
+                        }
+                    } else {
+                        let shared_secret = parse_shared_secret(
+                            params_struct.my_private_key,
+                            params_struct.their_public_key,
+                        );
+                        types::ComputeEcdhSharedSecretResponse {
+                            success: true,
+                            shared_secret: Some(hex::encode(shared_secret.to_bytes())),
+                            error: None,
+                        }
+                    }
+                }
+                (Err(e), _) => types::ComputeEcdhSharedSecretResponse {
+                    success: false,
+                    shared_secret: None,
+                    error: Some(format!("Invalid private key hex: {}", e)),
+                },
+                (_, Err(e)) => types::ComputeEcdhSharedSecretResponse {
+                    success: false,
+                    shared_secret: None,
+                    error: Some(format!("Invalid public key hex: {}", e)),
+                },
+            };
+
+            Ok(warp::reply::json(&response))
+        });
+
+    let derive_auth_from_ecdh = warp::post()
+        .and(warp::path("v1"))
+        .and(warp::path("derive_auth_from_ecdh"))
+        .and(warp::path::end())
+        .and(warp::body::content_length_limit(1024 * 32))
+        .and(warp::body::json())
+        .map(|json_map: HashMap<String, String>| {
+            let json = hashmap_to_json_string(json_map);
+            println!("Deriving authentication token from ECDH...");
+            let params_struct: types::DeriveAuthFromEcdhPacket =
+                serde_json::from_str(&json).expect("JSON was misformatted.");
+
+            let response = match (
+                hex::decode(&params_struct.my_private_key),
+                hex::decode(&params_struct.their_public_key),
+                hex::decode(&params_struct.context),
+            ) {
+                (Ok(private_bytes), Ok(public_bytes), Ok(context_bytes)) => {
+                    if private_bytes.len() != 32 || public_bytes.len() != 32 {
+                        types::DeriveAuthFromEcdhResponse {
+                            success: false,
+                            shared_secret: None,
+                            derived_token: None,
+                            error: Some("Keys must be 32 bytes (64 hex chars)".to_string()),
+                        }
+                    } else {
+                        // 1. Compute ECDH shared secret
+                        let shared_secret = parse_shared_secret(
+                            params_struct.my_private_key.clone(),
+                            params_struct.their_public_key.clone(),
+                        );
+                        
+                        // 2. Derive authentication token using HKDF (Whiteflag spec 5.2.3)
+                        let auth_token = wf_auth::WhiteflagAuthToken::new(shared_secret.to_bytes().to_vec());
+                        match auth_token.get_verification_data(context_bytes) {
+                            Ok(derived) => types::DeriveAuthFromEcdhResponse {
+                                success: true,
+                                shared_secret: Some(hex::encode(shared_secret.to_bytes())),
+                                derived_token: Some(hex::encode(derived)),
+                                error: None,
+                            },
+                            Err(e) => types::DeriveAuthFromEcdhResponse {
+                                success: false,
+                                shared_secret: Some(hex::encode(shared_secret.to_bytes())),
+                                derived_token: None,
+                                error: Some(format!("HKDF derivation failed: {:?}", e)),
+                            },
+                        }
+                    }
+                }
+                (Err(e), _, _) => types::DeriveAuthFromEcdhResponse {
+                    success: false,
+                    shared_secret: None,
+                    derived_token: None,
+                    error: Some(format!("Invalid private key hex: {}", e)),
+                },
+                (_, Err(e), _) => types::DeriveAuthFromEcdhResponse {
+                    success: false,
+                    shared_secret: None,
+                    derived_token: None,
+                    error: Some(format!("Invalid public key hex: {}", e)),
+                },
+                (_, _, Err(e)) => types::DeriveAuthFromEcdhResponse {
+                    success: false,
+                    shared_secret: None,
+                    derived_token: None,
+                    error: Some(format!("Invalid context hex: {}", e)),
+                },
+            };
+
+            Ok(warp::reply::json(&response))
+        });
+
     let routes = hello
         .or(post_test)
         .or(keypair)
@@ -342,7 +533,11 @@ pub async fn start_api() {
         .or(rsa_verify)
         .or(whiteflag_encode)
         .or(whiteflag_decode)
-        .or(big_multiply);
+        .or(big_multiply)
+        .or(derive_auth_token)
+        .or(generate_ecdh_keypair)
+        .or(compute_ecdh_shared_secret)
+        .or(derive_auth_from_ecdh);
 
     warp::serve(routes).run(([0, 0, 0, 0], 9031)).await;
 }

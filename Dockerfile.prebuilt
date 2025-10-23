@@ -1,0 +1,17 @@
+# Use pre-built binary for faster deployment
+FROM debian:bookworm-slim
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the pre-built binary
+COPY target/release/fennel-cli /usr/local/bin/
+
+# Expose the API port
+EXPOSE 9031
+
+# Run the API server
+CMD ["fennel-cli", "start-api"]

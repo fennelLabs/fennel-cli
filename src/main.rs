@@ -10,8 +10,7 @@ use client::{
     handle_generate_keypair, handle_sign, handle_verify,
 };
 use command::{Cli, Commands};
-use fennel_lib::FennelRSAPublicKey;
-use rsa::RsaPublicKey;
+use fennel_lib::{FennelRSAPublicKey, RsaPublicKey};
 use std::error::Error;
 
 use crate::api::start_api;

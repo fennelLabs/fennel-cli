@@ -1,0 +1,25 @@
+# Stage 1: Build the Rust binary with local dependencies
+FROM rust:1.82 AS builder
+WORKDIR /build
+
+# Copy dependency source code
+COPY ../fennel-lib-updated /build/fennel-lib-updated
+COPY ../whiteflag-rust /build/whiteflag-rust
+
+# Copy fennel-cli source
+COPY . /build/fennel-cli
+WORKDIR /build/fennel-cli
+
+# Build the binary
+RUN cargo build --release --bin fennel-cli
+
+# Stage 2: Create minimal runtime image
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /build/fennel-cli/target/release/fennel-cli /usr/local/bin/
+EXPOSE 9031
+CMD ["fennel-cli", "start-api"]

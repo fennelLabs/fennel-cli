@@ -1,0 +1,24 @@
+# Dockerfile for fennel-cli using pre-built binary
+FROM debian:bookworm-slim
+
+# Install runtime dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    ca-certificates \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app directory
+WORKDIR /app
+
+# Copy the pre-built binary
+COPY target/release/fennel-cli /app/fennel-cli
+
+# Make it executable
+RUN chmod +x /app/fennel-cli
+
+# Expose the API port
+EXPOSE 9031
+
+# Run the API server
+CMD ["/app/fennel-cli", "start-api"]

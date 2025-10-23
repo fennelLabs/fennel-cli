@@ -4,14 +4,14 @@ mod tests;
 use fennel_lib::{
     generate_keypair, get_session_public_key, get_session_secret, get_shared_secret, hash,
     rsa_tools::{decrypt, encrypt},
-    sign, verify, AESCipher, FennelCipher, FennelRSAPublicKey,
+    sign, verify, AESCipher, FennelCipher, FennelRSAPublicKey, RsaPrivateKey, RsaPublicKey,
 };
 use std::str;
 use x25519_dalek::{PublicKey, SharedSecret, StaticSecret};
 
 /// Convenience wrapper for managing local key storage.
-pub fn handle_generate_keypair(bits: usize) -> ([u8; 16], rsa::RsaPrivateKey, rsa::RsaPublicKey) {
-    let (private_key, public_key): (rsa::RsaPrivateKey, rsa::RsaPublicKey) = generate_keypair(bits);
+pub fn handle_generate_keypair(bits: usize) -> ([u8; 16], RsaPrivateKey, RsaPublicKey) {
+    let (private_key, public_key): (RsaPrivateKey, RsaPublicKey) = generate_keypair(bits);
 
     let pub_key = FennelRSAPublicKey::new(public_key).unwrap();
     let fingerprint: [u8; 16] = hash(pub_key.as_u8())[0..16].try_into().unwrap();
@@ -25,13 +25,13 @@ pub fn handle_encrypt(public_key: &str, plaintext: &str) -> Vec<u8> {
 }
 
 /// Handles RSA decryption.
-pub fn handle_decrypt(ciphertext: Vec<u8>, private_key: &rsa::RsaPrivateKey) -> String {
+pub fn handle_decrypt(ciphertext: Vec<u8>, private_key: &RsaPrivateKey) -> String {
     let decrypted = decrypt(private_key, ciphertext);
     String::from(str::from_utf8(&decrypted).unwrap())
 }
 
 /// Issues a signature based on the current user's identity.
-pub fn handle_sign(message: &str, private_key: rsa::RsaPrivateKey) -> String {
+pub fn handle_sign(message: &str, private_key: RsaPrivateKey) -> String {
     hex::encode(sign(&private_key, message.as_bytes().to_vec()))
 }
 

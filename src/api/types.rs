@@ -79,3 +79,53 @@ pub struct BigMultiplyResponse {
     pub result: u128,
     pub error: Option<String>,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct DeriveAuthTokenPacket {
+    pub secret: String,
+    pub context: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct DeriveAuthTokenResponse {
+    pub success: bool,
+    pub derived_token: Option<String>,
+    pub error: Option<String>,
+}
+
+// ECDH Authentication Types
+#[derive(Debug, Serialize)]
+pub struct GenerateEcdhKeypairResponse {
+    pub success: bool,
+    pub private_key: Option<String>,
+    pub public_key: Option<String>,
+    pub error: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ComputeEcdhSharedSecretPacket {
+    pub my_private_key: String,
+    pub their_public_key: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ComputeEcdhSharedSecretResponse {
+    pub success: bool,
+    pub shared_secret: Option<String>,
+    pub error: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DeriveAuthFromEcdhPacket {
+    pub my_private_key: String,
+    pub their_public_key: String,
+    pub context: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct DeriveAuthFromEcdhResponse {
+    pub success: bool,
+    pub shared_secret: Option<String>,
+    pub derived_token: Option<String>,
+    pub error: Option<String>,
+}
