@@ -24,7 +24,7 @@ aes = "0.7.5"
 bytes = "1.1.0"
 rand = "0.8.4"
 sha3 = "0.10.0"
-jsonrpsee = { version = "0.15.1", features = ["full"] }
+jsonrpsee = { version = "0.15.1", features = ["ws-server", "http-server", "http-client", "macros"] }
 jsonrpsee-http-server = "0.15.1"
 jsonrpsee-http-client = "0.15.1"
 jsonrpsee-proc-macros = "0.15.1"
