@@ -5,6 +5,8 @@ use fennel_lib::{
     generate_keypair, get_session_public_key, get_session_secret, get_shared_secret, hash,
     rsa_tools::{decrypt, encrypt},
     sign, verify, AESCipher, FennelCipher, FennelRSAPublicKey, RsaPrivateKey, RsaPublicKey,
+    // Brainpool functions for Whiteflag RFC 5639 compliance
+    generate_brainpool_keypair, import_brainpool_keypair, compute_brainpool_shared_secret,
 };
 use std::str;
 use x25519_dalek::{PublicKey, SharedSecret, StaticSecret};
@@ -98,3 +100,30 @@ pub fn unpack_message(ciphertext: Vec<u8>) -> Vec<u8> {
     let ciphertext_mod = &ciphertext[8..count];
     ciphertext_mod.to_vec()
 }
+
+// ========================================
+// Brainpool Functions (RFC 5639 Whiteflag)
+// ========================================
+
+/// Generates a random brainpoolP256r1 keypair for Whiteflag RFC 5639 compliance.
+/// Returns: (private_key: 32 bytes, public_key: 33 bytes SEC1 compressed)
+pub fn handle_generate_brainpool_keypair() -> (Vec<u8>, Vec<u8>) {
+    generate_brainpool_keypair()
+}
+
+/// Imports a brainpoolP256r1 keypair from a 32-byte private key.
+/// Returns: (private_key: 32 bytes, public_key: 33 bytes SEC1 compressed)
+pub fn handle_import_brainpool_keypair(private_key_bytes: &[u8]) -> Result<(Vec<u8>, Vec<u8>), String> {
+    import_brainpool_keypair(private_key_bytes)
+}
+
+/// Computes ECDH shared secret using brainpoolP256r1.
+/// Args: my_private_key (32 bytes), their_public_key (33 bytes SEC1 compressed)
+/// Returns: shared_secret (32 bytes)
+pub fn handle_compute_brainpool_shared_secret(
+    my_private_key: &[u8],
+    their_public_key: &[u8],
+) -> Result<Vec<u8>, String> {
+    compute_brainpool_shared_secret(my_private_key, their_public_key)
+}
+

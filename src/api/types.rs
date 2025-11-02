@@ -129,3 +129,39 @@ pub struct DeriveAuthFromEcdhResponse {
     pub derived_token: Option<String>,
     pub error: Option<String>,
 }
+
+// Brainpool ECDH Types (RFC 5639 Whiteflag Compliance)
+#[derive(Debug, Serialize)]
+pub struct GenerateBrainpoolKeypairResponse {
+    pub success: bool,
+    pub private_key: Option<String>,
+    pub public_key: Option<String>,
+    pub error: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ImportBrainpoolKeypairPacket {
+    pub private_key: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ImportBrainpoolKeypairResponse {
+    pub success: bool,
+    pub private_key: Option<String>,
+    pub public_key: Option<String>,
+    pub error: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ComputeBrainpoolSharedSecretPacket {
+    pub my_private_key: String,
+    pub their_public_key: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ComputeBrainpoolSharedSecretResponse {
+    pub success: bool,
+    pub shared_secret: Option<String>,
+    pub error: Option<String>,
+}
+

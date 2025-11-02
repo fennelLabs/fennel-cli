@@ -14,6 +14,9 @@ use crate::{
     client::{
         handle_aes_decrypt, handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one,
         handle_generate_keypair, handle_sign, parse_shared_secret, prep_cipher_from_secret,
+        // Brainpool handlers for Whiteflag RFC 5639 compliance
+        handle_generate_brainpool_keypair, handle_import_brainpool_keypair,
+        handle_compute_brainpool_shared_secret,
     },
 };
 use fennel_lib::{encrypt, verify, FennelRSAPrivateKey, FennelRSAPublicKey};
@@ -520,6 +523,133 @@ pub async fn start_api() {
             Ok(warp::reply::json(&response))
         });
 
+    // Brainpool ECDH endpoints for Whiteflag RFC 5639 compliance
+    let generate_brainpool_keypair = warp::post()
+        .and(warp::path("v1"))
+        .and(warp::path("generate_brainpool_keypair"))
+        .and(warp::path::end())
+        .and_then(|| async {
+            println!("Generating brainpool keypair (brainpoolP256r1)...");
+            let (private_key, public_key) = handle_generate_brainpool_keypair();
+            
+            let response = types::GenerateBrainpoolKeypairResponse {
+                success: true,
+                private_key: Some(hex::encode(private_key)),
+                public_key: Some(hex::encode(public_key)),
+                error: None,
+            };
+            
+            Ok::<_, warp::Rejection>(warp::reply::json(&response))
+        });
+
+    let import_brainpool_keypair = warp::post()
+        .and(warp::path("v1"))
+        .and(warp::path("import_brainpool_keypair"))
+        .and(warp::path::end())
+        .and(warp::body::content_length_limit(1024 * 32))
+        .and(warp::body::json())
+        .map(|json_map: HashMap<String, String>| {
+            let json = hashmap_to_json_string(json_map);
+            println!("Importing brainpool keypair...");
+            let params_struct: types::ImportBrainpoolKeypairPacket =
+                serde_json::from_str(&json).expect("JSON was misformatted.");
+
+            let response = match hex::decode(&params_struct.private_key) {
+                Ok(private_bytes) => {
+                    if private_bytes.len() != 32 {
+                        types::ImportBrainpoolKeypairResponse {
+                            success: false,
+                            private_key: None,
+                            public_key: None,
+                            error: Some("Private key must be 32 bytes (64 hex chars)".to_string()),
+                        }
+                    } else {
+                        match handle_import_brainpool_keypair(&private_bytes) {
+                            Ok((priv_key, pub_key)) => types::ImportBrainpoolKeypairResponse {
+                                success: true,
+                                private_key: Some(hex::encode(priv_key)),
+                                public_key: Some(hex::encode(pub_key)),
+                                error: None,
+                            },
+                            Err(e) => types::ImportBrainpoolKeypairResponse {
+                                success: false,
+                                private_key: None,
+                                public_key: None,
+                                error: Some(format!("Failed to import keypair: {}", e)),
+                            },
+                        }
+                    }
+                }
+                Err(e) => types::ImportBrainpoolKeypairResponse {
+                    success: false,
+                    private_key: None,
+                    public_key: None,
+                    error: Some(format!("Invalid private key hex: {}", e)),
+                },
+            };
+
+            Ok(warp::reply::json(&response))
+        });
+
+    let compute_brainpool_shared_secret = warp::post()
+        .and(warp::path("v1"))
+        .and(warp::path("compute_brainpool_shared_secret"))
+        .and(warp::path::end())
+        .and(warp::body::content_length_limit(1024 * 32))
+        .and(warp::body::json())
+        .map(|json_map: HashMap<String, String>| {
+            let json = hashmap_to_json_string(json_map);
+            println!("Computing brainpool shared secret...");
+            let params_struct: types::ComputeBrainpoolSharedSecretPacket =
+                serde_json::from_str(&json).expect("JSON was misformatted.");
+
+            let response = match (
+                hex::decode(&params_struct.my_private_key),
+                hex::decode(&params_struct.their_public_key),
+            ) {
+                (Ok(private_bytes), Ok(public_bytes)) => {
+                    if private_bytes.len() != 32 {
+                        types::ComputeBrainpoolSharedSecretResponse {
+                            success: false,
+                            shared_secret: None,
+                            error: Some("Private key must be 32 bytes (64 hex chars)".to_string()),
+                        }
+                    } else if public_bytes.len() != 33 {
+                        types::ComputeBrainpoolSharedSecretResponse {
+                            success: false,
+                            shared_secret: None,
+                            error: Some("Public key must be 33 bytes SEC1 compressed (66 hex chars)".to_string()),
+                        }
+                    } else {
+                        match handle_compute_brainpool_shared_secret(&private_bytes, &public_bytes) {
+                            Ok(shared_secret) => types::ComputeBrainpoolSharedSecretResponse {
+                                success: true,
+                                shared_secret: Some(hex::encode(shared_secret)),
+                                error: None,
+                            },
+                            Err(e) => types::ComputeBrainpoolSharedSecretResponse {
+                                success: false,
+                                shared_secret: None,
+                                error: Some(format!("Failed to compute shared secret: {}", e)),
+                            },
+                        }
+                    }
+                }
+                (Err(e), _) => types::ComputeBrainpoolSharedSecretResponse {
+                    success: false,
+                    shared_secret: None,
+                    error: Some(format!("Invalid private key hex: {}", e)),
+                },
+                (_, Err(e)) => types::ComputeBrainpoolSharedSecretResponse {
+                    success: false,
+                    shared_secret: None,
+                    error: Some(format!("Invalid public key hex: {}", e)),
+                },
+            };
+
+            Ok(warp::reply::json(&response))
+        });
+
     let routes = hello
         .or(post_test)
         .or(keypair)
@@ -537,7 +667,11 @@ pub async fn start_api() {
         .or(derive_auth_token)
         .or(generate_ecdh_keypair)
         .or(compute_ecdh_shared_secret)
-        .or(derive_auth_from_ecdh);
+        .or(derive_auth_from_ecdh)
+        // Brainpool endpoints for Whiteflag RFC 5639 compliance
+        .or(generate_brainpool_keypair)
+        .or(import_brainpool_keypair)
+        .or(compute_brainpool_shared_secret);
 
     warp::serve(routes).run(([0, 0, 0, 0], 9031)).await;
 }
