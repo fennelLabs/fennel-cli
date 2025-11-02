@@ -164,4 +164,3 @@ pub struct ComputeBrainpoolSharedSecretResponse {
     pub shared_secret: Option<String>,
     pub error: Option<String>,
 }
-

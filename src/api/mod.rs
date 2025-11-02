@@ -12,11 +12,18 @@ mod types;
 use crate::{
     api::types::BigMultiplyResponse,
     client::{
-        handle_aes_decrypt, handle_aes_encrypt, handle_decrypt, handle_diffie_hellman_one,
-        handle_generate_keypair, handle_sign, parse_shared_secret, prep_cipher_from_secret,
-        // Brainpool handlers for Whiteflag RFC 5639 compliance
-        handle_generate_brainpool_keypair, handle_import_brainpool_keypair,
+        handle_aes_decrypt,
+        handle_aes_encrypt,
         handle_compute_brainpool_shared_secret,
+        handle_decrypt,
+        handle_diffie_hellman_one,
+        // Brainpool handlers for Whiteflag RFC 5639 compliance
+        handle_generate_brainpool_keypair,
+        handle_generate_keypair,
+        handle_import_brainpool_keypair,
+        handle_sign,
+        parse_shared_secret,
+        prep_cipher_from_secret,
     },
 };
 use fennel_lib::{encrypt, verify, FennelRSAPrivateKey, FennelRSAPublicKey};
@@ -389,14 +396,14 @@ pub async fn start_api() {
         .and_then(|| async {
             println!("Generating ECDH keypair (X25519)...");
             let (secret, public) = handle_diffie_hellman_one();
-            
+
             let response = types::GenerateEcdhKeypairResponse {
                 success: true,
                 private_key: Some(hex::encode(secret.to_bytes())),
                 public_key: Some(hex::encode(public.to_bytes())),
                 error: None,
             };
-            
+
             Ok::<_, warp::Rejection>(warp::reply::json(&response))
         });
 
@@ -481,9 +488,10 @@ pub async fn start_api() {
                             params_struct.my_private_key.clone(),
                             params_struct.their_public_key.clone(),
                         );
-                        
+
                         // 2. Derive authentication token using HKDF (Whiteflag spec 5.2.3)
-                        let auth_token = wf_auth::WhiteflagAuthToken::new(shared_secret.to_bytes().to_vec());
+                        let auth_token =
+                            wf_auth::WhiteflagAuthToken::new(shared_secret.to_bytes().to_vec());
                         match auth_token.get_verification_data(context_bytes) {
                             Ok(derived) => types::DeriveAuthFromEcdhResponse {
                                 success: true,
@@ -531,14 +539,14 @@ pub async fn start_api() {
         .and_then(|| async {
             println!("Generating brainpool keypair (brainpoolP256r1)...");
             let (private_key, public_key) = handle_generate_brainpool_keypair();
-            
+
             let response = types::GenerateBrainpoolKeypairResponse {
                 success: true,
                 private_key: Some(hex::encode(private_key)),
                 public_key: Some(hex::encode(public_key)),
                 error: None,
             };
-            
+
             Ok::<_, warp::Rejection>(warp::reply::json(&response))
         });
 
@@ -618,10 +626,14 @@ pub async fn start_api() {
                         types::ComputeBrainpoolSharedSecretResponse {
                             success: false,
                             shared_secret: None,
-                            error: Some("Public key must be 33 bytes SEC1 compressed (66 hex chars)".to_string()),
+                            error: Some(
+                                "Public key must be 33 bytes SEC1 compressed (66 hex chars)"
+                                    .to_string(),
+                            ),
                         }
                     } else {
-                        match handle_compute_brainpool_shared_secret(&private_bytes, &public_bytes) {
+                        match handle_compute_brainpool_shared_secret(&private_bytes, &public_bytes)
+                        {
                             Ok(shared_secret) => types::ComputeBrainpoolSharedSecretResponse {
                                 success: true,
                                 shared_secret: Some(hex::encode(shared_secret)),
